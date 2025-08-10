@@ -212,7 +212,7 @@ export default function TransactionsTable({ transactions, filterType }: Transact
             </Select>
         </div>
       </CardHeader>
-      <CardContent className="h-[340px] overflow-y-auto">
+      <CardContent>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
