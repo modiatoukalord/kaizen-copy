@@ -60,7 +60,7 @@ export default function DashboardHeader() {
             <SelectContent>
                 <SelectItem value="USD">USD</SelectItem>
                 <SelectItem value="EUR">EUR</SelectItem>
-                <SelectItem value="XOF">XOF</SelectItem>
+                <SelectItem value="XOF">FCFA</SelectItem>
             </SelectContent>
         </Select>
         <AddTransactionSheet type={transactionType}>

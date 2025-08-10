@@ -26,6 +26,11 @@ export function formatCurrency(amount: number, currency: string = 'XOF') {
   if (currency === 'XOF') {
     options.currencyDisplay = 'code';
     options.minimumFractionDigits = 0;
+    
+    const locale = 'fr-FR';
+    let formatted = new Intl.NumberFormat(locale, options).format(convertedAmount);
+    // Replace XOF with FCFA for display
+    return formatted.replace('XOF', 'FCFA');
   }
 
   const locale = currency === 'EUR' ? 'fr-FR' : 'en-US';
