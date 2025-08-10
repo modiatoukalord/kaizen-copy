@@ -1,3 +1,4 @@
+
 // This is a server-side file!
 'use server';
 
@@ -10,17 +11,11 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { z } from 'zod';
+import { TransactionCategory } from '@/lib/types';
 
-const TransactionCategorySchema = z.enum([
-  'Food',
-  'Transportation',
-  'Entertainment',
-  'Utilities',
-  'Rent',
-  'Salary',
-  'Other',
-]);
+
+const TransactionCategorySchema = z.enum(TransactionCategory);
 
 const CategorizeTransactionInputSchema = z.object({
   transactionDescription: z
@@ -76,7 +71,7 @@ const prompt = ai.definePrompt({
   The user has no past transaction history.
   {{/if}}
 
-  Please categorize the transaction into one of the following categories: Food, Transportation, Entertainment, Utilities, Rent, Salary, Other.
+  Please categorize the transaction into one of the following categories: ${TransactionCategory.join(', ')}.
   Return a confidence score between 0 and 1.
   `,
 });

@@ -4,7 +4,7 @@ import type { Transaction } from './types';
 // In a real application, you would use a proper database.
 if (!global.transactions) {
   global.transactions = [
-    { id: '1', date: new Date(new Date().setDate(1)).toISOString(), description: 'Monthly Salary', amount: 5000, category: 'Salary', type: 'income', account: 'Banque' },
+    { id: '1', date: new Date(new Date().setDate(1)).toISOString(), description: 'Monthly Salary', amount: 5000, category: 'Salaire', type: 'income', account: 'Banque' },
     { id: '2', date: new Date(new Date().setDate(1)).toISOString(), description: 'Apartment Rent', amount: 1500, category: 'Rent', type: 'expense', account: 'Banque' },
     { id: '3', date: new Date(new Date().setDate(3)).toISOString(), description: 'Grocery Shopping', amount: 250, category: 'Food', type: 'expense', account: 'Mobile money' },
     { id: '4', date: new Date(new Date().setDate(5)).toISOString(), description: 'Electricity Bill', amount: 80, category: 'Utilities', type: 'expense', account: 'Banque' },
@@ -12,6 +12,8 @@ if (!global.transactions) {
     { id: '6', date: new Date(new Date().setDate(12)).toISOString(), description: 'Gasoline for car', amount: 60, category: 'Transportation', type: 'expense', account: 'Mobile money' },
     { id: '7', date: new Date(new Date().setDate(15)).toISOString(), description: 'New headphones', amount: 200, category: 'Other', type: 'expense', account: 'Banque' },
     { id: '8', date: new Date(new Date().setDate(20)).toISOString(), description: 'Movie tickets', amount: 30, category: 'Entertainment', type: 'expense', account: 'Espèces' },
+    { id: '9', date: new Date(new Date().setDate(1)).toISOString(), description: 'Freelance Project', amount: 1000, category: 'Salaire', type: 'income', account: 'Banque' },
+    { id: '10', date: new Date(new Date().setDate(15)).toISOString(), description: 'Birthday Gift', amount: 100, category: 'Don', type: 'income', account: 'Espèces' },
   ] as Transaction[];
 }
 

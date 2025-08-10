@@ -31,7 +31,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { toast } from '@/hooks/use-toast';
-import { TransactionCategory, TransactionAccount, type Category, type Account } from '@/lib/types';
+import { TransactionCategory, TransactionAccount, type Category, type Account, IncomeCategory, ExpenseCategory } from '@/lib/types';
 import { handleAddTransaction, suggestCategory } from '@/app/actions';
 
 const transactionFormSchema = z.object({
@@ -71,6 +71,19 @@ export function AddTransactionSheet({ children }: { children: React.ReactNode })
       date: new Date(),
     },
   });
+
+  const transactionType = form.watch('type');
+
+  const availableCategories = React.useMemo(() => {
+    return transactionType === 'income' ? IncomeCategory : ExpenseCategory;
+  }, [transactionType]);
+
+  React.useEffect(() => {
+    // Reset category if it's not in the available categories for the selected type
+    if (!availableCategories.includes(form.getValues('category') as any)) {
+      form.setValue('category', availableCategories[0] as Category);
+    }
+  }, [transactionType, availableCategories, form]);
 
   const [state, formAction] = useFormState(handleAddTransaction, initialState);
 
@@ -214,7 +227,7 @@ export function AddTransactionSheet({ children }: { children: React.ReactNode })
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                {TransactionCategory.map((cat) => (
+                {availableCategories.map((cat) => (
                   <SelectItem key={cat} value={cat}>
                     {cat}
                   </SelectItem>

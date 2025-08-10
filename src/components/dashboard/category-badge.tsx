@@ -7,10 +7,13 @@ import {
   Landmark,
   MoreHorizontal,
   type LucideIcon,
+  Gift,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Category } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { IncomeCategory } from '@/lib/types';
 
 export const categoryIcons: Record<Category, LucideIcon> = {
   Food: UtensilsCrossed,
@@ -18,8 +21,10 @@ export const categoryIcons: Record<Category, LucideIcon> = {
   Entertainment: Ticket,
   Utilities: Lightbulb,
   Rent: Home,
-  Salary: Landmark,
+  Salaire: Landmark,
   Other: MoreHorizontal,
+  Don: Gift,
+  Emprunt: ArrowLeftRight,
 };
 
 interface CategoryBadgeProps {
@@ -29,7 +34,7 @@ interface CategoryBadgeProps {
 
 export function CategoryBadge({ category, className }: CategoryBadgeProps) {
   const Icon = categoryIcons[category] || MoreHorizontal;
-  const isIncome = category === 'Salary';
+  const isIncome = (IncomeCategory as readonly string[]).includes(category);
 
   return (
     <Badge

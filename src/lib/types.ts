@@ -1,14 +1,24 @@
 import type { z } from 'zod';
 import type { categorizeTransaction } from '@/ai/flows/categorize-transaction';
 
-export const TransactionCategory = [
+export const IncomeCategory = [
+    'Salaire',
+    'Don',
+    'Emprunt'
+] as const;
+
+export const ExpenseCategory = [
   'Food',
   'Transportation',
   'Entertainment',
   'Utilities',
   'Rent',
-  'Salary',
   'Other',
+] as const;
+
+export const TransactionCategory = [
+  ...IncomeCategory,
+  ...ExpenseCategory
 ] as const;
 
 export const TransactionAccount = [
@@ -19,6 +29,9 @@ export const TransactionAccount = [
 
 export type Account = (typeof TransactionAccount)[number];
 export type Category = (typeof TransactionCategory)[number];
+export type IncomeCategoryType = (typeof IncomeCategory)[number];
+export type ExpenseCategoryType = (typeof ExpenseCategory)[number];
+
 
 export type Transaction = {
   id: string;
