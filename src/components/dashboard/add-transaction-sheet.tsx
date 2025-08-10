@@ -119,8 +119,14 @@ export function AddTransactionSheet({ children }: { children: React.ReactNode })
     setIsSuggesting(true);
     try {
         const result = await suggestCategory(description, amount);
-        if (result?.category) {
+        if (result?.category && availableCategories.includes(result.category as any)) {
             form.setValue('category', result.category);
+        } else if (result?.category) {
+            toast({
+                variant: 'default',
+                title: 'Suggestion Adjusted',
+                description: `AI suggested "${result.category}" which is not a valid ${transactionType} category. Please select one from the list.`,
+            })
         }
     } catch (error) {
         toast({
