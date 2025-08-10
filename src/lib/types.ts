@@ -4,7 +4,8 @@ import type { categorizeTransaction } from '@/ai/flows/categorize-transaction';
 export const IncomeCategory = [
     'Salaire',
     'Don',
-    'Emprunt'
+    'Emprunt',
+    'Aide sociale'
 ] as const;
 
 export const ExpenseCategory = [
