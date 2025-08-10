@@ -14,6 +14,8 @@ export const ExpenseCategory = [
   'Services publics',
   'Loyer',
   'Aide sociale',
+  'Investissement',
+  'Remboursement',
   'Autre',
 ] as const;
 

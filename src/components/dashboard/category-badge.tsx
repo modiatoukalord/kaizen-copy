@@ -10,6 +10,8 @@ import {
   Gift,
   ArrowLeftRight,
   HelpingHand,
+  TrendingUp,
+  CircleArrowLeft,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Category } from '@/lib/types';
@@ -27,6 +29,8 @@ export const categoryIcons: Record<Category, LucideIcon> = {
   Don: Gift,
   Emprunt: ArrowLeftRight,
   'Aide sociale': HelpingHand,
+  Investissement: TrendingUp,
+  Remboursement: CircleArrowLeft,
 };
 
 interface CategoryBadgeProps {
