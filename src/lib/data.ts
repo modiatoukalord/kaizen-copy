@@ -5,7 +5,7 @@ import type { Transaction } from './types';
 if (!global.transactions) {
   global.transactions = [
     { id: '1', date: new Date(new Date().setDate(1)).toISOString(), description: 'Salaire mensuel', amount: 3000000, category: 'Salaire', type: 'income', account: 'Banque' },
-    { id: '2', date: new Date(new Date().setDate(1)).toISOString(), description: 'Loyer de l\'appartement', amount: 900000, category: 'Loyer', type: 'expense', account: 'Banque' },
+    { id: '2', date: new Date(new Date().setDate(1)).toISOString(), description: 'Loyer de l\'appartement', amount: 900000, category: 'Autre', type: 'expense', account: 'Banque' },
     { id: '3', date: new Date(new Date().setDate(3)).toISOString(), description: 'Achats d\'épicerie', amount: 150000, category: 'Nourriture', type: 'expense', account: 'Mobile money' },
     { id: '4', date: new Date(new Date().setDate(5)).toISOString(), description: 'Facture d\'électricité', amount: 50000, category: 'Services publics', type: 'expense', account: 'Banque' },
     { id: '5', date: new Date(new Date().setDate(10)).toISOString(), description: 'Dîner entre amis', amount: 75000, category: 'Divertissement', type: 'expense', account: 'Espèces' },

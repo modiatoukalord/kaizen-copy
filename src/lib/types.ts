@@ -12,7 +12,6 @@ export const ExpenseCategory = [
   'Transport',
   'Divertissement',
   'Services publics',
-  'Loyer',
   'Aide sociale',
   'Investissement',
   'Remboursement',
