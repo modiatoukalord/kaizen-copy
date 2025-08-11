@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -25,13 +26,15 @@ export default function ParetoChart({ transactions }: ParetoChartProps) {
     const sortedCategories = Object.entries(categoryTotals)
       .map(([category, total]) => ({ category, total }))
       .sort((a, b) => b.total - a.total);
+    
+    const top5Categories = sortedCategories.slice(0, 5);
 
-    const totalExpenses = sortedCategories.reduce((sum, item) => sum + item.total, 0);
+    const totalExpenses = top5Categories.reduce((sum, item) => sum + item.total, 0);
     
     if (totalExpenses === 0) return [];
 
     let cumulative = 0;
-    return sortedCategories.map(item => {
+    return top5Categories.map(item => {
       cumulative += item.total;
       return {
         ...item,
@@ -58,7 +61,7 @@ export default function ParetoChart({ transactions }: ParetoChartProps) {
     <Card>
       <CardHeader>
         <CardTitle>Diagramme de Pareto des Dépenses</CardTitle>
-        <CardDescription>Analyse des catégories de dépenses les plus importantes.</CardDescription>
+        <CardDescription>Analyse des 5 catégories de dépenses les plus importantes.</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={{}} className="h-[400px] w-full">
