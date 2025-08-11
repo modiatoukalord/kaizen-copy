@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowUpRight, DollarSign, ArrowLeftRight } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, DollarSign, ArrowLeftRight, TrendingUp, CircleArrowLeft } from 'lucide-react';
 import type { Transaction } from '@/lib/types';
 import StatCard from './stat-card';
 
