@@ -33,6 +33,24 @@ export default function StatCards({ transactions, filterType }: StatCardsProps) 
             </div>
         );
     }
+
+    if (filterType === 'expense') {
+        const totalInvestissement = transactions
+            .filter(t => t.category === 'Investissement' && t.type === 'expense')
+            .reduce((sum, t) => sum + t.amount, 0);
+        
+        const totalRemboursement = transactions
+            .filter(t => t.category === 'Remboursement' && t.type === 'expense')
+            .reduce((sum, t) => sum + t.amount, 0);
+
+        return (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <StatCard title="Total des dépenses" value={expenses} icon={ArrowDownLeft} />
+                <StatCard title="Total investissement" value={totalInvestissement} icon={TrendingUp} />
+                <StatCard title="Total remboursement" value={totalRemboursement} icon={CircleArrowLeft} />
+            </div>
+        );
+    }
     
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
