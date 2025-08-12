@@ -27,6 +27,7 @@ export default function DashboardHeader() {
     { href: '/expenses', label: 'Dépenses' },
     { href: '/transfers', label: 'Virements' },
     { href: '/charts', label: 'Graphiques' },
+    { href: '/planning', label: 'Planning' },
   ];
 
   const transactionType = (() => {
@@ -36,6 +37,7 @@ export default function DashboardHeader() {
   })();
   
   const isTransfersPage = pathname === '/transfers';
+  const isPlanningPage = pathname === '/planning';
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
@@ -68,20 +70,22 @@ export default function DashboardHeader() {
                 <SelectItem value="XOF">FCFA</SelectItem>
             </SelectContent>
         </Select>
-        {isTransfersPage ? (
-            <AddTransferSheet>
-                <Button>
-                    <ArrowRightLeft className="mr-2 h-4 w-4" />
-                    Nouveau virement
-                </Button>
-            </AddTransferSheet>
-        ) : (
-            <AddTransactionSheet type={transactionType}>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Ajouter une transaction
-                </Button>
-            </AddTransactionSheet>
+        {!isPlanningPage && (
+          isTransfersPage ? (
+              <AddTransferSheet>
+                  <Button>
+                      <ArrowRightLeft className="mr-2 h-4 w-4" />
+                      Nouveau virement
+                  </Button>
+              </AddTransferSheet>
+          ) : (
+              <AddTransactionSheet type={transactionType}>
+                  <Button>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Ajouter une transaction
+                  </Button>
+              </AddTransactionSheet>
+          )
         )}
       </div>
     </header>
