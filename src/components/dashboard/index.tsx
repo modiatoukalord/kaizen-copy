@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -24,10 +25,9 @@ interface DashboardProps {
   title?: string;
   filterType?: 'income' | 'expense';
   hideCharts?: boolean;
-  showTransactions?: boolean;
 }
 
-export default function Dashboard({ initialTransactions, title="Tableau de bord", filterType, hideCharts = false, showTransactions = false }: DashboardProps) {
+export default function Dashboard({ initialTransactions, title="Tableau de bord", filterType, hideCharts = false }: DashboardProps) {
   const [period, setPeriod] = useState<Period>('monthly');
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
 
@@ -62,6 +62,13 @@ export default function Dashboard({ initialTransactions, title="Tableau de bord"
 
     return periodTransactions;
   }, [period, transactions, filterType]);
+  
+  const allTransactionsForType = useMemo(() => {
+     if (filterType) {
+        return transactions.filter(t => t.type === filterType);
+    }
+    return transactions;
+  }, [transactions, filterType]);
 
   if (filterType) {
     return (
@@ -82,7 +89,7 @@ export default function Dashboard({ initialTransactions, title="Tableau de bord"
             
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <div className="col-span-4 lg:col-span-7">
-                    <TransactionsTable transactions={filteredTransactions} filterType={filterType} />
+                    <TransactionsTable transactions={allTransactionsForType} filterType={filterType} />
                 </div>
             </div>
         </>
@@ -109,11 +116,6 @@ export default function Dashboard({ initialTransactions, title="Tableau de bord"
             { !hideCharts && (
                 <div className="col-span-4 lg:col-span-7">
                     <ExpensesChart transactions={filteredTransactions} />
-                </div>
-            )}
-             { showTransactions && (
-                <div className="col-span-4 lg:col-span-7">
-                    <TransactionsTable transactions={initialTransactions} />
                 </div>
             )}
         </div>

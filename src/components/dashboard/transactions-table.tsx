@@ -31,10 +31,9 @@ import { Input } from '@/components/ui/input';
 interface TransactionsTableProps {
   transactions: Transaction[];
   filterType?: 'income' | 'expense';
-  showFilters?: boolean;
 }
 
-export default function TransactionsTable({ transactions, filterType, showFilters = false }: TransactionsTableProps) {
+export default function TransactionsTable({ transactions, filterType }: TransactionsTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'date', desc: true },
   ]);
@@ -125,11 +124,58 @@ export default function TransactionsTable({ transactions, filterType, showFilter
     },
   });
 
+  const categoryOptions = React.useMemo(() => {
+    let categories: readonly string[];
+    if (filterType === 'income') {
+      categories = IncomeCategory;
+    } else if (filterType === 'expense') {
+      categories = ExpenseCategory;
+    } else {
+      categories = [...IncomeCategory, ...ExpenseCategory];
+    }
+    return categories.map(cat => ({ label: cat, value: cat }));
+  }, [filterType]);
+
+  const isFiltered = table.getState().columnFilters.length > 0;
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
-        <CardTitle>Transactions Récentes</CardTitle>
-        <CardDescription>Une liste de vos activités financières récentes.</CardDescription>
+        <CardTitle>Transactions</CardTitle>
+        <CardDescription>Une liste de vos activités financières.</CardDescription>
+        <div className="flex items-center gap-2 py-4">
+            <Input
+              placeholder="Filtrer par description..."
+              value={(table.getColumn('description')?.getFilterValue() as string) ?? ''}
+              onChange={(event) =>
+                table.getColumn('description')?.setFilterValue(event.target.value)
+              }
+              className="max-w-sm"
+            />
+            {table.getColumn('category') && (
+              <DataTableFacetedFilter
+                column={table.getColumn('category')}
+                title="Catégorie"
+                options={categoryOptions}
+              />
+            )}
+            {table.getColumn('account') && (
+                <DataTableFacetedFilter
+                    column={table.getColumn('account')}
+                    title="Compte"
+                    options={TransactionAccount.map(acc => ({ label: acc, value: acc }))}
+                />
+            )}
+            {isFiltered && (
+                <Button
+                    variant="ghost"
+                    onClick={() => table.resetColumnFilters()}
+                    className="h-10 px-2 lg:px-3"
+                >
+                    Réinitialiser
+                </Button>
+            )}
+        </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto">
         <Table>
