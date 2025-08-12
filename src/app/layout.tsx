@@ -5,7 +5,7 @@ import DashboardHeader from '@/components/dashboard/dashboard-header';
 import { CurrencyProvider } from '@/contexts/currency-context';
 
 export const metadata: Metadata = {
-  title: 'Financial Compass',
+  title: 'Le KAIZEN',
   description: 'A personal finance dashboard to track income and expenses.',
 };
 

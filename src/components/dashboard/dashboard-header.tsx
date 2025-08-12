@@ -113,7 +113,7 @@ export default function DashboardHeader() {
       <nav className="hidden w-full flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <Link href="/" className="flex items-center gap-2 text-lg font-semibold md:text-base">
           <PiggyBank className="h-6 w-6 text-primary" />
-          <span className="font-headline">Financial Compass</span>
+          <span className="font-headline">Le KAIZEN</span>
         </Link>
         {navItems.map((item) => (
             <Link
