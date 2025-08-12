@@ -5,8 +5,7 @@ export const IncomeCategory = [
     'Salaire',
     'Don',
     'Dette',
-    'Créance',
-    'Retrait banque'
+    'Créance'
 ] as const;
 
 export const ExpenseCategory = [
