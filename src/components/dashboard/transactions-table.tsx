@@ -50,7 +50,7 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => new Date(row.original.date).toLocaleDateString(),
+      cell: ({ row }) => new Date(row.original.date).toLocaleDateString('fr-FR'),
     },
     {
       accessorKey: 'description',
