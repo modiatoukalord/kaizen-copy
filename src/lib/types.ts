@@ -15,6 +15,7 @@ export const ExpenseCategory = [
   'Aide sociale',
   'Investissement',
   'Remboursement',
+  'Prêt',
   'Autre',
 ] as const;
 
