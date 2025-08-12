@@ -125,7 +125,16 @@ export default function TransactionsTable({ transactions, filterType, showFilter
     },
   });
 
-  const categoryOptions = (filterType === 'income' ? IncomeCategory : ExpenseCategory).map(c => ({label: c, value: c}));
+  const categoryOptions = React.useMemo(() => {
+    let categories: readonly string[] = [];
+    const type = filterType || (transactions.length > 0 ? transactions[0].type : undefined);
+    if(type === 'income') {
+        categories = IncomeCategory;
+    } else if (type === 'expense') {
+        categories = ExpenseCategory;
+    }
+    return categories.map(c => ({label: c, value: c}));
+  }, [filterType, transactions]);
 
   return (
     <Card className="h-full flex flex-col">
