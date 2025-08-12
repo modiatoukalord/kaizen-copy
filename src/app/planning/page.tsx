@@ -8,15 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, AlertTriangle, Bell } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ExpenseCategory, TransactionCategory } from '@/lib/types';
+import { ExpenseCategory } from '@/lib/types';
 import type { Category, Transaction } from '@/lib/types';
 import { getTransactions } from '@/lib/data';
-import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval, getYear, isSameDay } from 'date-fns';
+import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval, getYear, isSameDay, isFuture, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useCurrency } from '@/contexts/currency-context';
 import { formatCurrency } from '@/lib/utils';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 
 type BudgetItem = {
@@ -95,6 +96,17 @@ export default function PlanningPage() {
         spent: spentByCategory[item.category] || 0,
     }));
   }, [budgetItems, monthlyTransactions]);
+
+  const overBudgetItems = useMemo(() => {
+    return budgetWithSpent.filter(item => item.planned - item.spent < 0);
+  }, [budgetWithSpent]);
+
+  const upcomingEvents = useMemo(() => {
+    const today = new Date();
+    return events.filter(event => 
+        isFuture(event.date) && differenceInDays(event.date, today) <= 7
+    ).sort((a,b) => a.date.getTime() - b.date.getTime());
+  }, [events]);
   
   const eventsForSelectedDate = useMemo(() => {
     if (!selectedDate) return [];
@@ -184,6 +196,15 @@ export default function PlanningPage() {
                 </div>
             </CardHeader>
             <CardContent>
+                {overBudgetItems.length > 0 && (
+                    <Alert variant="destructive" className="mb-4">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>Attention, budget dépassé !</AlertTitle>
+                        <AlertDescription>
+                            Vous avez dépassé votre budget pour les catégories suivantes : {overBudgetItems.map(item => item.category).join(', ')}.
+                        </AlertDescription>
+                    </Alert>
+                )}
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -247,6 +268,21 @@ export default function PlanningPage() {
                 <CardDescription>Notez vos prévisions.</CardDescription>
                 </CardHeader>
                 <CardContent>
+                     {upcomingEvents.length > 0 && (
+                        <Alert className="mb-4">
+                            <Bell className="h-4 w-4" />
+                            <AlertTitle>Événements à venir</AlertTitle>
+                            <AlertDescription>
+                                <ul className="text-sm">
+                                    {upcomingEvents.map(event => (
+                                        <li key={event.id}>
+                                            {format(event.date, 'dd/MM')}: {event.description} ({formatCurrency(event.amount, currency)})
+                                        </li>
+                                    ))}
+                                </ul>
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     <Calendar
                         mode="single"
                         selected={selectedDate}
