@@ -22,6 +22,8 @@ import { Input } from '@/components/ui/input';
 import { DataTableFacetedFilter } from './data-table-faceted-filter';
 import { IncomeCategory, ExpenseCategory, TransactionAccount } from '@/lib/types';
 import { Button } from '../ui/button';
+import SummaryChart from './summary-chart';
+
 
 interface DashboardProps {
   initialTransactions: Transaction[];
@@ -140,13 +142,8 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
         
         <StatCards transactions={filteredData.transactions} transfers={filteredData.transfers} filterType={filterType} />
         
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <div className="col-span-4 lg:col-span-7">
-                <TransactionsTable 
-                    transactions={transactions} 
-                    categoryOptions={categoryOptions}
-                />
-            </div>
+        <div className="grid gap-4">
+            <SummaryChart transactions={filteredData.transactions} period={period} />
         </div>
     </>
   );
