@@ -13,6 +13,7 @@ import {
   HandCoins,
   BookUser,
   ScrollText,
+  ArrowDownFromLine,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Category } from '@/lib/types';
@@ -33,6 +34,7 @@ export const categoryIcons: Record<Category, LucideIcon> = {
   Prêt: HandCoins,
   Dette: BookUser,
   Créance: ScrollText,
+  'Retrait banque': ArrowDownFromLine,
 };
 
 interface CategoryBadgeProps {
