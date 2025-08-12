@@ -26,6 +26,7 @@ import { useCurrency } from '@/contexts/currency-context';
 import { DataTableFacetedFilter } from './data-table-faceted-filter';
 import { TransactionAccount, IncomeCategory, ExpenseCategory } from '@/lib/types';
 import { Input } from '@/components/ui/input';
+import { format } from 'date-fns';
 
 
 interface TransactionsTableProps {
@@ -50,7 +51,7 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => new Date(row.original.date).toLocaleDateString('fr-FR'),
+      cell: ({ row }) => format(new Date(row.getValue('date')), 'dd/MM/yyyy'),
     },
     {
       accessorKey: 'description',

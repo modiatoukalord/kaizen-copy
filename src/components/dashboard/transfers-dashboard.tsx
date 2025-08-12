@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { formatCurrency, cn } from '@/lib/utils';
 import { useCurrency } from '@/contexts/currency-context';
 import { AddTransferSheet } from './add-transfer-sheet';
+import { format } from 'date-fns';
 
 interface TransfersDashboardProps {
   initialTransfers: Transfer[];
@@ -37,7 +38,7 @@ export default function TransfersDashboard({ initialTransfers }: TransfersDashbo
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => new Date(row.original.date).toLocaleDateString(),
+      cell: ({ row }) => format(new Date(row.getValue('date')), 'dd/MM/yyyy'),
     },
     {
       accessorKey: 'description',
