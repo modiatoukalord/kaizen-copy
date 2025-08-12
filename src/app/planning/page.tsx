@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ExpenseCategory, TransactionCategory } from '@/lib/types';
 import type { Category, Transaction } from '@/lib/types';
 import { getTransactions } from '@/lib/data';
-import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval, getYear } from 'date-fns';
+import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval, getYear, isSameDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useCurrency } from '@/contexts/currency-context';
 import { formatCurrency } from '@/lib/utils';
@@ -24,9 +24,16 @@ type BudgetItem = {
     planned: number;
 };
 
+type CalendarEvent = {
+  id: string;
+  date: Date;
+  description: string;
+  amount: number;
+};
+
 export default function PlanningPage() {
   const { currency } = useCurrency();
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([
     { category: 'Nourriture', planned: 200000 },
     { category: 'Transport', planned: 50000 },
@@ -35,6 +42,10 @@ export default function PlanningPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'MM'));
   const [selectedYear, setSelectedYear] = useState<number>(getYear(new Date()));
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [newEventDescription, setNewEventDescription] = useState('');
+  const [newEventAmount, setNewEventAmount] = useState<number | ''>('');
+
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -84,6 +95,12 @@ export default function PlanningPage() {
         spent: spentByCategory[item.category] || 0,
     }));
   }, [budgetItems, monthlyTransactions]);
+  
+  const eventsForSelectedDate = useMemo(() => {
+    if (!selectedDate) return [];
+    return events.filter(event => isSameDay(event.date, selectedDate));
+  }, [events, selectedDate]);
+
 
   const handleAddItem = () => {
     setBudgetItems([...budgetItems, { category: 'Autre', planned: 0 }]);
@@ -103,6 +120,23 @@ export default function PlanningPage() {
     const newItems = [...budgetItems];
     newItems[index].planned = newPlanned;
     setBudgetItems(newItems);
+  };
+  
+  const handleAddEvent = () => {
+    if (!selectedDate || !newEventDescription || newEventAmount === '') return;
+    const newEvent: CalendarEvent = {
+        id: crypto.randomUUID(),
+        date: selectedDate,
+        description: newEventDescription,
+        amount: Number(newEventAmount),
+    };
+    setEvents([...events, newEvent]);
+    setNewEventDescription('');
+    setNewEventAmount('');
+  };
+
+  const handleRemoveEvent = (eventId: string) => {
+    setEvents(events.filter(event => event.id !== eventId));
   };
 
 
@@ -215,14 +249,53 @@ export default function PlanningPage() {
                 <CardContent>
                     <Calendar
                         mode="single"
-                        selected={date}
-                        onSelect={setDate}
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
                         className="rounded-md border"
+                        locale={fr}
                     />
-                    <div className="mt-4 space-y-2">
-                        <Label htmlFor="event">Événement pour la date sélectionnée</Label>
-                        <Input id="event" placeholder="Ex: Paiement facture SENELEC" />
-                        <Button className='w-full'>Ajouter l'événement</Button>
+                    <div className="mt-4 space-y-4">
+                        <div>
+                            <Label htmlFor="event-description">Nouvel événement</Label>
+                            <div className='flex gap-2'>
+                                <Input 
+                                    id="event-description" 
+                                    placeholder="Ex: Facture SENELEC" 
+                                    value={newEventDescription}
+                                    onChange={(e) => setNewEventDescription(e.target.value)}
+                                />
+                                <Input 
+                                    type="number" 
+                                    placeholder="Montant" 
+                                    value={newEventAmount}
+                                    onChange={(e) => setNewEventAmount(e.target.value === '' ? '' : Number(e.target.value))}
+                                    className="w-[120px]"
+                                />
+                            </div>
+                            <Button onClick={handleAddEvent} className='w-full mt-2'>Ajouter l'événement</Button>
+                        </div>
+                        
+                        {selectedDate && (
+                            <div>
+                                <h4 className="font-medium mb-2">
+                                    Événements pour le {format(selectedDate, 'd MMMM yyyy', { locale: fr })}
+                                </h4>
+                                {eventsForSelectedDate.length > 0 ? (
+                                    <ul className='space-y-2'>
+                                        {eventsForSelectedDate.map(event => (
+                                            <li key={event.id} className="flex items-center justify-between text-sm p-2 rounded-md bg-muted/50">
+                                                <span>{event.description} - {formatCurrency(event.amount, currency)}</span>
+                                                <Button variant="ghost" size="icon" onClick={() => handleRemoveEvent(event.id)}>
+                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                </Button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">Aucun événement pour cette date.</p>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>
