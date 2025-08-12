@@ -82,7 +82,7 @@ export default function Dashboard({ initialTransactions, title="Tableau de bord"
             
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <div className="col-span-4 lg:col-span-7">
-                    <TransactionsTable transactions={filteredTransactions} filterType={filterType} showFilters={true} />
+                    <TransactionsTable transactions={filteredTransactions} filterType={filterType} />
                 </div>
             </div>
         </>

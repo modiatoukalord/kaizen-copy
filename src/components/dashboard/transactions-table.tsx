@@ -125,48 +125,11 @@ export default function TransactionsTable({ transactions, filterType, showFilter
     },
   });
 
-  const categoryOptions = React.useMemo(() => {
-    let categories: readonly string[] = [];
-    const type = filterType || (transactions.length > 0 ? transactions[0].type : undefined);
-    if(type === 'income') {
-        categories = IncomeCategory;
-    } else if (type === 'expense') {
-        categories = ExpenseCategory;
-    }
-    return categories.map(c => ({label: c, value: c}));
-  }, [filterType, transactions]);
-
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle>Transactions Récentes</CardTitle>
         <CardDescription>Une liste de vos activités financières récentes.</CardDescription>
-        {showFilters && (
-            <div className="flex items-center gap-2 pt-4">
-                <Input
-                    placeholder="Filtrer par description..."
-                    value={(table.getColumn('description')?.getFilterValue() as string) ?? ''}
-                    onChange={(event) =>
-                        table.getColumn('description')?.setFilterValue(event.target.value)
-                    }
-                    className="max-w-sm"
-                />
-                {table.getColumn('account') && (
-                    <DataTableFacetedFilter
-                        column={table.getColumn('account')}
-                        title="Comptes"
-                        options={TransactionAccount.map(acc => ({label: acc, value: acc}))}
-                    />
-                )}
-                {table.getColumn('category') && (
-                    <DataTableFacetedFilter
-                        column={table.getColumn('category')}
-                        title="Catégories"
-                        options={categoryOptions}
-                    />
-                )}
-            </div>
-        )}
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto">
         <Table>
