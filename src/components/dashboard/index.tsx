@@ -19,6 +19,10 @@ import StatCards from './stat-cards';
 import ExpensesChart from './expenses-chart';
 import TransactionsTable from './transactions-table';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { DataTableFacetedFilter } from './data-table-faceted-filter';
+import { IncomeCategory, ExpenseCategory, TransactionAccount } from '@/lib/types';
+import { Button } from '../ui/button';
 
 interface DashboardProps {
   initialTransactions: Transaction[];
@@ -70,6 +74,19 @@ export default function Dashboard({ initialTransactions, title="Tableau de bord"
     return transactions;
   }, [transactions, filterType]);
 
+  const categoryOptions = React.useMemo(() => {
+    let categories: readonly string[];
+    if (filterType === 'income') {
+      categories = IncomeCategory;
+    } else if (filterType === 'expense') {
+      categories = ExpenseCategory;
+    } else {
+      categories = [...IncomeCategory, ...ExpenseCategory];
+    }
+    return categories.map(cat => ({ label: cat, value: cat }));
+  }, [filterType]);
+
+
   if (filterType) {
     return (
         <>
@@ -89,7 +106,11 @@ export default function Dashboard({ initialTransactions, title="Tableau de bord"
             
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <div className="col-span-4 lg:col-span-7">
-                    <TransactionsTable transactions={allTransactionsForType} filterType={filterType} />
+                    <TransactionsTable 
+                        transactions={allTransactionsForType} 
+                        filterType={filterType} 
+                        categoryOptions={categoryOptions}
+                    />
                 </div>
             </div>
         </>
@@ -113,11 +134,12 @@ export default function Dashboard({ initialTransactions, title="Tableau de bord"
         <StatCards transactions={filteredTransactions} filterType={filterType} />
         
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            { !hideCharts && (
-                <div className="col-span-4 lg:col-span-7">
-                    <ExpensesChart transactions={filteredTransactions} />
-                </div>
-            )}
+            <div className="col-span-4 lg:col-span-7">
+                <TransactionsTable 
+                    transactions={transactions} 
+                    categoryOptions={categoryOptions}
+                />
+            </div>
         </div>
     </>
   );

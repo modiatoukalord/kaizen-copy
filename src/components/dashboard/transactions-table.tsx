@@ -31,9 +31,10 @@ import { Input } from '@/components/ui/input';
 interface TransactionsTableProps {
   transactions: Transaction[];
   filterType?: 'income' | 'expense';
+  categoryOptions: { label: string; value: string; }[];
 }
 
-export default function TransactionsTable({ transactions, filterType }: TransactionsTableProps) {
+export default function TransactionsTable({ transactions, filterType, categoryOptions }: TransactionsTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'date', desc: true },
   ]);
@@ -123,18 +124,6 @@ export default function TransactionsTable({ transactions, filterType }: Transact
       columnFilters,
     },
   });
-
-  const categoryOptions = React.useMemo(() => {
-    let categories: readonly string[];
-    if (filterType === 'income') {
-      categories = IncomeCategory;
-    } else if (filterType === 'expense') {
-      categories = ExpenseCategory;
-    } else {
-      categories = [...IncomeCategory, ...ExpenseCategory];
-    }
-    return categories.map(cat => ({ label: cat, value: cat }));
-  }, [filterType]);
 
   const isFiltered = table.getState().columnFilters.length > 0;
 
