@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ExpenseCategory, TransactionCategory } from '@/lib/types';
 import type { Category, Transaction } from '@/lib/types';
 import { getTransactions } from '@/lib/data';
-import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval, getYear } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useCurrency } from '@/contexts/currency-context';
 import { formatCurrency } from '@/lib/utils';
@@ -33,7 +33,8 @@ export default function PlanningPage() {
     { category: 'Divertissement', planned: 75000 },
   ]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
+  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'MM'));
+  const [selectedYear, setSelectedYear] = useState<number>(getYear(new Date()));
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -43,26 +44,34 @@ export default function PlanningPage() {
     fetchTransactions();
   }, []);
 
+  const years = useMemo(() => {
+    const currentYear = getYear(new Date());
+    const yearOptions = [];
+    for (let i = 0; i < 5; i++) {
+        yearOptions.push(currentYear - i);
+    }
+    return yearOptions;
+  }, []);
+
   const months = useMemo(() => {
     const monthOptions = [];
     for (let i = 0; i < 12; i++) {
-      const date = subMonths(new Date(), i);
+      const date = new Date(2000, i, 1); // Use a dummy year
       monthOptions.push({
-        value: format(date, 'yyyy-MM'),
-        label: format(date, 'MMMM yyyy', { locale: fr }),
+        value: format(date, 'MM'),
+        label: format(date, 'MMMM', { locale: fr }),
       });
     }
     return monthOptions;
   }, []);
 
   const monthlyTransactions = useMemo(() => {
-    if (!selectedMonth) return [];
-    const [year, month] = selectedMonth.split('-').map(Number);
-    const startDate = startOfMonth(new Date(year, month - 1));
-    const endDate = endOfMonth(new Date(year, month - 1));
+    if (!selectedMonth || !selectedYear) return [];
+    const startDate = startOfMonth(new Date(selectedYear, parseInt(selectedMonth, 10) - 1));
+    const endDate = endOfMonth(new Date(selectedYear, parseInt(selectedMonth, 10) - 1));
     const interval = { start: startDate, end: endDate };
     return transactions.filter(t => t.type === 'expense' && isWithinInterval(new Date(t.date), interval));
-  }, [selectedMonth, transactions]);
+  }, [selectedMonth, selectedYear, transactions]);
 
   const budgetWithSpent = useMemo(() => {
     const spentByCategory = monthlyTransactions.reduce((acc, t) => {
@@ -112,15 +121,27 @@ export default function PlanningPage() {
                         <CardTitle>Plan budgétaire</CardTitle>
                         <CardDescription>Définissez et suivez votre budget mensuel.</CardDescription>
                     </div>
-                     <div className="w-[200px]">
+                     <div className="flex gap-2">
                         <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                            <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un mois" />
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Sélectionner un mois" />
                             </SelectTrigger>
                             <SelectContent>
                             {months.map(month => (
                                 <SelectItem key={month.value} value={month.value}>
                                 {month.label}
+                                </SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
+                        <Select value={String(selectedYear)} onValueChange={(value) => setSelectedYear(Number(value))}>
+                             <SelectTrigger className="w-[120px]">
+                                <SelectValue placeholder="Sélectionner une année" />
+                            </SelectTrigger>
+                            <SelectContent>
+                            {years.map(year => (
+                                <SelectItem key={year} value={String(year)}>
+                                {year}
                                 </SelectItem>
                             ))}
                             </SelectContent>
