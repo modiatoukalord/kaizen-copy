@@ -15,7 +15,7 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
 } from '@tanstack/react-table';
-import { Pencil, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ArrowUpDown } from 'lucide-react';
@@ -41,6 +41,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuTrigger,
+  } from "@/components/ui/dropdown-menu"
 import { handleDeleteTransaction } from '@/app/actions';
 import { toast } from '@/hooks/use-toast';
 
@@ -146,33 +153,44 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
             const transaction = row.original;
             return (
                 <div className='flex justify-end'>
-                    <AddTransactionSheet transaction={transaction}>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Modifier</span>
-                            <Pencil className="h-4 w-4" />
-                        </Button>
-                    </AddTransactionSheet>
                     <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0 text-destructive hover:text-destructive">
-                                <span className="sr-only">Supprimer</span>
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    Cette action est irréversible. La transaction sera définitivement supprimée.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => onDelete(transaction.id)} disabled={isPending}>
-                                    Continuer
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Ouvrir le menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <AddTransactionSheet transaction={transaction}>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Modifier
+                            </DropdownMenuItem>
+                          </AddTransactionSheet>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Supprimer
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <AlertDialogContent>
+                          <AlertDialogHeader>
+                              <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                  Cette action est irréversible. La transaction sera définitivement supprimée.
+                              </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                              <AlertDialogCancel>Annuler</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => onDelete(transaction.id)} disabled={isPending}>
+                                  Continuer
+                              </AlertDialogAction>
+                          </AlertDialogFooter>
+                      </AlertDialogContent>
                     </AlertDialog>
                 </div>
             )

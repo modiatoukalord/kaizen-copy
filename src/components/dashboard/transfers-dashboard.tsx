@@ -6,7 +6,7 @@ import type { Transfer } from '@/lib/types';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable, SortingState, getSortedRowModel, ColumnFiltersState, getFilteredRowModel, getPaginationRowModel } from '@tanstack/react-table';
-import { ArrowUpDown, ArrowRight, Pencil, Trash2 } from 'lucide-react';
+import { ArrowUpDown, ArrowRight, Pencil, Trash2, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, cn } from '@/lib/utils';
 import { useCurrency } from '@/contexts/currency-context';
@@ -23,6 +23,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuTrigger,
+  } from "@/components/ui/dropdown-menu"
 import { handleDeleteTransfer } from '@/app/actions';
 import { toast } from '@/hooks/use-toast';
 
@@ -110,19 +117,30 @@ export default function TransfersDashboard({ initialTransfers }: TransfersDashbo
             const transfer = row.original;
             return (
                 <div className='flex justify-end'>
-                    <AddTransferSheet transfer={transfer}>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Modifier</span>
-                            <Pencil className="h-4 w-4" />
-                        </Button>
-                    </AddTransferSheet>
                     <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0 text-destructive hover:text-destructive">
-                                <span className="sr-only">Supprimer</span>
-                                <Trash2 className="h-4 w-4" />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Ouvrir le menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
                             </Button>
-                        </AlertDialogTrigger>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <AddTransferSheet transfer={transfer}>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    Modifier
+                                </DropdownMenuItem>
+                            </AddTransferSheet>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Supprimer
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
