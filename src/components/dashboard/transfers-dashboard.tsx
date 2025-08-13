@@ -6,12 +6,25 @@ import type { Transfer } from '@/lib/types';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable, SortingState, getSortedRowModel, ColumnFiltersState, getFilteredRowModel, getPaginationRowModel } from '@tanstack/react-table';
-import { ArrowUpDown, ArrowRight, Pencil } from 'lucide-react';
+import { ArrowUpDown, ArrowRight, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, cn } from '@/lib/utils';
 import { useCurrency } from '@/contexts/currency-context';
 import { AddTransferSheet } from './add-transfer-sheet';
 import { format } from 'date-fns';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { handleDeleteTransfer } from '@/app/actions';
+import { toast } from '@/hooks/use-toast';
 
 interface TransfersDashboardProps {
   initialTransfers: Transfer[];
@@ -24,10 +37,29 @@ export default function TransfersDashboard({ initialTransfers }: TransfersDashbo
   ]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const { currency } = useCurrency();
+  const [isPending, startTransition] = React.useTransition();
 
   React.useEffect(() => {
     setTransfers(initialTransfers);
   }, [initialTransfers]);
+  
+  const onDelete = (id: string) => {
+    startTransition(async () => {
+        const result = await handleDeleteTransfer(id);
+        if (result.success) {
+            toast({
+                title: 'Succès',
+                description: result.message,
+            });
+        } else {
+            toast({
+                variant: 'destructive',
+                title: 'Erreur',
+                description: result.message,
+            });
+        }
+    });
+  }
 
   const columns: ColumnDef<Transfer>[] = [
     {
@@ -77,12 +109,36 @@ export default function TransfersDashboard({ initialTransfers }: TransfersDashbo
         cell: ({ row }) => {
             const transfer = row.original;
             return (
-                <AddTransferSheet transfer={transfer}>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Ouvrir le menu</span>
-                        <Pencil className="h-4 w-4" />
-                    </Button>
-                </AddTransferSheet>
+                <div className='flex justify-end'>
+                    <AddTransferSheet transfer={transfer}>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Modifier</span>
+                            <Pencil className="h-4 w-4" />
+                        </Button>
+                    </AddTransferSheet>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0 text-destructive hover:text-destructive">
+                                <span className="sr-only">Supprimer</span>
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Cette action est irréversible. Le virement sera définitivement supprimé.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => onDelete(transfer.id)} disabled={isPending}>
+                                    Continuer
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
             )
         }
     }

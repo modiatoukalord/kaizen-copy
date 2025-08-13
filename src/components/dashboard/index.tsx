@@ -113,6 +113,7 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
                         filterType={filterType} 
                         categoryOptions={categoryOptions}
                         globalFilter={globalFilter}
+                        onGlobalFilterChange={setGlobalFilter}
                     />
                 </div>
             </div>

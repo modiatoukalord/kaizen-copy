@@ -44,6 +44,15 @@ export const updateTransaction = async (transaction: Transaction) => {
     throw new Error('Transaction not found');
 };
 
+export const deleteTransaction = async (id: string) => {
+    const index = global.transactions.findIndex(t => t.id === id);
+    if (index !== -1) {
+        global.transactions.splice(index, 1);
+        return Promise.resolve();
+    }
+    throw new Error('Transaction not found');
+}
+
 export const getTransfers = async (): Promise<Transfer[]> => {
     return Promise.resolve(global.transfers);
 };
@@ -62,3 +71,12 @@ export const updateTransfer = async (transfer: Transfer) => {
     }
     throw new Error('Transfer not found');
 };
+
+export const deleteTransfer = async (id: string) => {
+    const index = global.transfers.findIndex(t => t.id === id);
+    if (index !== -1) {
+        global.transfers.splice(index, 1);
+        return Promise.resolve();
+    }
+    throw new Error('Transfer not found');
+}

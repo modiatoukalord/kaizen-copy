@@ -15,7 +15,7 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
 } from '@tanstack/react-table';
-import { Pencil } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ArrowUpDown } from 'lucide-react';
@@ -30,27 +30,54 @@ import { TransactionAccount, IncomeCategory, ExpenseSubCategory, ExpenseParentCa
 import { Input } from '@/components/ui/input';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { handleDeleteTransaction } from '@/app/actions';
+import { toast } from '@/hooks/use-toast';
 
 interface TransactionsTableProps {
   transactions: Transaction[];
   filterType?: 'income' | 'expense';
   categoryOptions: { label: string; value: string; }[];
-  globalFilter?: string;
+  globalFilter: string;
+  onGlobalFilterChange: (filter: string) => void;
 }
 
-export default function TransactionsTable({ transactions, filterType, categoryOptions, globalFilter: initialGlobalFilter }: TransactionsTableProps) {
+export default function TransactionsTable({ transactions, filterType, categoryOptions, globalFilter, onGlobalFilterChange }: TransactionsTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'date', desc: true },
   ]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = React.useState(initialGlobalFilter ?? '');
   const { currency } = useCurrency();
 
-  React.useEffect(() => {
-    if (initialGlobalFilter !== undefined && initialGlobalFilter !== globalFilter) {
-      setGlobalFilter(initialGlobalFilter);
-    }
-  }, [initialGlobalFilter, globalFilter]);
+  const [isPending, startTransition] = React.useTransition();
+
+  const onDelete = (id: string) => {
+    startTransition(async () => {
+        const result = await handleDeleteTransaction(id);
+        if (result.success) {
+            toast({
+                title: 'Succès',
+                description: result.message,
+            });
+        } else {
+            toast({
+                variant: 'destructive',
+                title: 'Erreur',
+                description: result.message,
+            });
+        }
+    });
+  }
 
   const columns: ColumnDef<Transaction>[] = [
     {
@@ -118,12 +145,36 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
         cell: ({ row }) => {
             const transaction = row.original;
             return (
-                <AddTransactionSheet transaction={transaction}>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Ouvrir le menu</span>
-                        <Pencil className="h-4 w-4" />
-                    </Button>
-                </AddTransactionSheet>
+                <div className='flex justify-end'>
+                    <AddTransactionSheet transaction={transaction}>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Modifier</span>
+                            <Pencil className="h-4 w-4" />
+                        </Button>
+                    </AddTransactionSheet>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0 text-destructive hover:text-destructive">
+                                <span className="sr-only">Supprimer</span>
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Cette action est irréversible. La transaction sera définitivement supprimée.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => onDelete(transaction.id)} disabled={isPending}>
+                                    Continuer
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
             )
         }
     }
@@ -132,7 +183,7 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
   const table = useReactTable({
     data: transactions,
     columns,
-    onGlobalFilterChange: setGlobalFilter,
+    onGlobalFilterChange: onGlobalFilterChange,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
@@ -164,7 +215,7 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
               placeholder="Filtrer toutes les colonnes..."
               value={globalFilter ?? ''}
               onChange={(event) =>
-                setGlobalFilter(event.target.value)
+                onGlobalFilterChange(event.target.value)
               }
               className="max-w-sm"
             />
@@ -194,7 +245,7 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
                     variant="ghost"
                     onClick={() => {
                         table.resetColumnFilters();
-                        setGlobalFilter('');
+                        onGlobalFilterChange('');
                     }}
                     className="h-10 px-2 lg:px-3"
                 >

@@ -1,10 +1,11 @@
+
 'use server';
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { categorizeTransaction as categorizeTransactionFlow } from '@/ai/flows/categorize-transaction';
 import { TransactionCategory, TransactionAccount, type CategorizeTransactionInput, ExpenseParentCategory } from '@/lib/types';
-import { addTransaction as dbAddTransaction, getTransactions, updateTransaction as dbUpdateTransaction, addTransfer as dbAddTransfer, updateTransfer as dbUpdateTransfer } from '@/lib/data';
+import { addTransaction as dbAddTransaction, getTransactions, updateTransaction as dbUpdateTransaction, deleteTransaction as dbDeleteTransaction, addTransfer as dbAddTransfer, updateTransfer as dbUpdateTransfer, deleteTransfer as dbDeleteTransfer } from '@/lib/data';
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -68,6 +69,19 @@ export async function handleAddOrUpdateTransaction(prevState: any, formData: For
   }
 }
 
+export async function handleDeleteTransaction(id: string) {
+    try {
+        await dbDeleteTransaction(id);
+        revalidatePath('/');
+        revalidatePath('/income');
+        revalidatePath('/expenses');
+        return { message: 'Transaction supprimée avec succès.', success: true };
+    } catch (error) {
+        return { message: 'Erreur de base de données: Échec de la suppression de la transaction.', success: false };
+    }
+}
+
+
 export async function handleAddOrUpdateTransfer(prevState: any, formData: FormData) {
   const validatedFields = transferFormSchema.safeParse(Object.fromEntries(formData.entries()));
 
@@ -94,6 +108,18 @@ export async function handleAddOrUpdateTransfer(prevState: any, formData: FormDa
     return { message: 'Erreur de base de données: Échec de l\'enregistrement du virement.', errors: {}, success: false };
   }
 }
+
+export async function handleDeleteTransfer(id: string) {
+    try {
+        await dbDeleteTransfer(id);
+        revalidatePath('/');
+        revalidatePath('/transfers');
+        return { message: 'Virement supprimé avec succès.', success: true };
+    } catch (error) {
+        return { message: 'Erreur de base de données: Échec de la suppression du virement.', success: false };
+    }
+}
+
 
 export async function suggestCategory(description: string, amount: number) {
   if (!description || !amount) return null;
