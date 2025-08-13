@@ -9,21 +9,20 @@ export const IncomeCategory = [
 ] as const;
 
 export const ExpenseCategory = [
-  'Nourriture',
-  'Transport',
-  'Divertissement',
-  'Services publics',
   'Aide sociale',
-  'Investissement',
-  'Remboursement',
-  'Prêt',
-  'Travaux',
-  'Equipements maison',
-  'Vêtements et accessoires',
-  'Vacances et voyage',
-  'Factures',
   'Assurances',
   'Autre',
+  'Divertissement',
+  'Equipements maison',
+  'Factures',
+  'Investissement',
+  'Nourriture',
+  'Prêt',
+  'Remboursement',
+  'Transport',
+  'Travaux',
+  'Vacances et voyage',
+  'Vêtements et accessoires',
 ] as const;
 
 export const TransactionCategory = [
