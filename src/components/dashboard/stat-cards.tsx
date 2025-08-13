@@ -21,15 +21,15 @@ export default function StatCards({ transactions, transfers, filterType }: StatC
 
     const balance = income - expenses;
     
-    const totalDette = transactions
-        .filter(t => t.category === 'Dette' && t.type === 'income')
+    const totalCredit = transactions
+        .filter(t => t.category === 'Crédit' && t.type === 'income')
         .reduce((sum, t) => sum + t.amount, 0);
     
     const totalRemboursement = transactions
         .filter(t => t.category === 'Remboursement' && t.type === 'expense')
         .reduce((sum, t) => sum + t.amount, 0);
         
-    const detteRestante = totalDette - totalRemboursement;
+    const creditRestant = totalCredit - totalRemboursement;
 
     const totalCreance = transactions
         .filter(t => t.category === 'Créance' && t.type === 'income')
@@ -43,11 +43,11 @@ export default function StatCards({ transactions, transfers, filterType }: StatC
 
 
     if (filterType === 'income') {
-        const gainPropre = income - totalDette;
+        const gainPropre = income - totalCredit;
         return (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <StatCard title="Revenu total" value={income} icon={ArrowUpRight} />
-                <StatCard title="Total dette" value={totalDette} icon={ArrowLeftRight} />
+                <StatCard title="Total crédit" value={totalCredit} icon={ArrowLeftRight} />
                 <StatCard title="Gain propre" value={gainPropre} icon={DollarSign} />
             </div>
         );
@@ -101,7 +101,7 @@ export default function StatCards({ transactions, transfers, filterType }: StatC
             {accountBalances.map(item => (
                 <StatCard key={item.account} title={`Solde ${item.account}`} value={item.balance} icon={accountIcons[item.account]} />
             ))}
-            <StatCard title="Dettes restantes" value={detteRestante} icon={ArrowLeftRight} />
+            <StatCard title="Crédits restants" value={creditRestant} icon={ArrowLeftRight} />
             <StatCard title="Prêts nets" value={pretNet} icon={TrendingUp} />
         </div>
     );

@@ -4,7 +4,7 @@ import type { categorizeTransaction } from '@/ai/flows/categorize-transaction';
 export const IncomeCategory = [
     'Salaire',
     'Don',
-    'Dette',
+    'Crédit',
     'Créance'
 ] as const;
 
@@ -22,6 +22,7 @@ export const ExpenseSubCategory = {
     'Vêtements et accessoires',
   ],
   Maison: [
+    'Assurances',
     'Equipements maison',
     'Factures',
     'Travaux'
@@ -35,7 +36,22 @@ export const AllExpenseSubCategories = [
     ...ExpenseSubCategory.Personnel,
     ...ExpenseSubCategory.Maison,
     ...ExpenseSubCategory.Transport
-] as const;
+].sort((a,b) => a.localeCompare(b)) as (
+  'Aide sociale' |
+  'Assurances' |
+  'Autre' |
+  'Divertissement' |
+  'Equipements maison' |
+  'Factures' |
+  'Investissement' |
+  'Nourriture' |
+  'Prêt' |
+  'Remboursement' |
+  'Transport' |
+  'Travaux' |
+  'Vacances et voyage' |
+  'Vêtements et accessoires'
+)[];
 
 
 export const TransactionCategory = [

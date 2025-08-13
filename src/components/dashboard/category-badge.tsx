@@ -35,7 +35,7 @@ export const categoryIcons: Record<Category, LucideIcon> = {
   Investissement: TrendingUp,
   Remboursement: CircleArrowLeft,
   Prêt: HandCoins,
-  Dette: BookUser,
+  Crédit: BookUser,
   Créance: ScrollText,
   Travaux: Wrench,
   'Equipements maison': Home,
