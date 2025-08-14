@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Dashboard from '@/components/dashboard';
 import { getTransactions } from '@/lib/data';
@@ -15,13 +15,13 @@ export default function IncomePage() {
   
   const scope: Scope = (searchParams.get('scope') as Scope) || 'Personnel';
 
-  useState(() => {
+  useEffect(() => {
     const fetchTransactions = async () => {
       const allTransactions = await getTransactions();
       setTransactions(allTransactions);
     };
     fetchTransactions();
-  });
+  }, []);
 
   const handleTabChange = (value: string) => {
     router.push(`/income?scope=${value}`);
