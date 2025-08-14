@@ -38,12 +38,14 @@ export const ExpenseSubCategory = {
   ]
 } as const;
 
-export const AllExpenseSubCategories = [
+const allSubCategories = [
     ...ExpenseSubCategory.Personnel,
     ...ExpenseSubCategory.Maison,
     ...ExpenseSubCategory.Transport,
     ...ExpenseSubCategory.Entreprise
-].sort((a,b) => a.localeCompare(b)) as (
+];
+
+export const AllExpenseSubCategories = [...new Set(allSubCategories)].sort((a,b) => a.localeCompare(b)) as (
   'Aide sociale' |
   'Assurances' |
   'Autre' |

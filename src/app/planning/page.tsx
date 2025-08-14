@@ -23,6 +23,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 
 type BudgetItem = {
+    id: string;
     category: ExpenseSubCategoryType;
     planned: number;
 };
@@ -43,9 +44,9 @@ export default function PlanningPage() {
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([
-    { category: 'Nourriture', planned: 200000 },
-    { category: 'Transport', planned: 50000 },
-    { category: 'Divertissement', planned: 75000 },
+    { id: crypto.randomUUID(), category: 'Nourriture', planned: 200000 },
+    { id: crypto.randomUUID(), category: 'Transport', planned: 50000 },
+    { id: crypto.randomUUID(), category: 'Divertissement', planned: 75000 },
   ]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'MM'));
@@ -126,22 +127,20 @@ export default function PlanningPage() {
 
 
   const handleAddItem = () => {
-    setBudgetItems([...budgetItems, { category: 'Autre', planned: 0 }]);
+    setBudgetItems([...budgetItems, { id: crypto.randomUUID(), category: 'Autre', planned: 0 }]);
   }
 
-  const handleRemoveItem = (index: number) => {
-    setBudgetItems(budgetItems.filter((_, i) => i !== index));
+  const handleRemoveItem = (id: string) => {
+    setBudgetItems(budgetItems.filter((item) => item.id !== id));
   }
   
-  const handleCategoryChange = (index: number, newCategory: ExpenseSubCategoryType) => {
-    const newItems = [...budgetItems];
-    newItems[index].category = newCategory;
+  const handleCategoryChange = (id: string, newCategory: ExpenseSubCategoryType) => {
+    const newItems = budgetItems.map(item => item.id === id ? { ...item, category: newCategory } : item);
     setBudgetItems(newItems);
   }
 
-  const handlePlannedChange = (index: number, newPlanned: number) => {
-    const newItems = [...budgetItems];
-    newItems[index].planned = newPlanned;
+  const handlePlannedChange = (id: string, newPlanned: number) => {
+    const newItems = budgetItems.map(item => item.id === id ? { ...item, planned: newPlanned } : item);
     setBudgetItems(newItems);
   };
   
@@ -236,19 +235,19 @@ export default function PlanningPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {budgetWithSpent.map((item, index) => (
-                            <TableRow key={index}>
+                        {budgetWithSpent.map((item) => (
+                            <TableRow key={item.id}>
                                 <TableCell className="w-[200px]">
                                     <Select
                                         value={item.category}
-                                        onValueChange={(value) => handleCategoryChange(index, value as ExpenseSubCategoryType)}
+                                        onValueChange={(value) => handleCategoryChange(item.id, value as ExpenseSubCategoryType)}
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Choisir une sous-catégorie" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {AllExpenseSubCategories.map((cat) => (
-                                                <SelectItem key={cat} value={cat}>
+                                            {AllExpenseSubCategories.map((cat, index) => (
+                                                <SelectItem key={`${cat}-${index}`} value={cat}>
                                                     {cat}
                                                 </SelectItem>
                                             ))}
@@ -259,14 +258,14 @@ export default function PlanningPage() {
                                     <Input 
                                         type="number" 
                                         value={item.planned}
-                                        onChange={(e) => handlePlannedChange(index, Number(e.target.value))}
+                                        onChange={(e) => handlePlannedChange(item.id, Number(e.target.value))}
                                         className="text-right" 
                                     />
                                 </TableCell>
                                 <TableCell className="text-right">{formatCurrency(item.spent, currency)}</TableCell>
                                 <TableCell className="text-right">{formatCurrency(item.planned - item.spent, currency)}</TableCell>
                                 <TableCell>
-                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(index)}>
+                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(item.id)}>
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </TableCell>
