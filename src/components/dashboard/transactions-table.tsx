@@ -20,14 +20,11 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { Transaction, Category, Scope } from '@/lib/types';
+import type { Transaction, Category } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
 import { CategoryBadge } from './category-badge';
 import { AddTransactionSheet } from './add-transaction-sheet';
 import { useCurrency } from '@/contexts/currency-context';
-import { DataTableFacetedFilter } from './data-table-faceted-filter';
-import { TransactionAccount, IncomeCategory, ExpenseSubCategory, ExpenseParentCategory } from '@/lib/types';
-import { Input } from '@/components/ui/input';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
@@ -54,13 +51,12 @@ import { toast } from '@/hooks/use-toast';
 interface TransactionsTableProps {
   transactions: Transaction[];
   filterType?: 'income' | 'expense';
-  scope?: Scope;
   categoryOptions: { label: string; value: string; }[];
   globalFilter: string;
   onGlobalFilterChange: (filter: string) => void;
 }
 
-export default function TransactionsTable({ transactions, filterType, scope, categoryOptions, globalFilter, onGlobalFilterChange }: TransactionsTableProps) {
+export default function TransactionsTable({ transactions, filterType, categoryOptions, globalFilter, onGlobalFilterChange }: TransactionsTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'date', desc: true },
   ]);
@@ -182,7 +178,7 @@ export default function TransactionsTable({ transactions, filterType, scope, cat
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <AddTransactionSheet transaction={transaction} scope={scope}>
+                              <AddTransactionSheet transaction={transaction}>
                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                     <Pencil className="mr-2 h-4 w-4" />
                                     Modifier
@@ -219,7 +215,7 @@ export default function TransactionsTable({ transactions, filterType, scope, cat
 
     return baseColumns;
 
-  }, [filterType, currency, isPending, scope]);
+  }, [filterType, currency, isPending]);
 
   const table = useReactTable({
     data: transactions,
@@ -244,12 +240,6 @@ export default function TransactionsTable({ transactions, filterType, scope, cat
         }
     }
   });
-
-  const isFiltered = table.getState().columnFilters.length > 0 || !!globalFilter;
-
-  const parentCategoryOptions = React.useMemo(() => {
-    return ExpenseParentCategory.map(cat => ({ label: cat, value: cat }));
-  }, []);
 
   return (
     <Card className="h-full flex flex-col">

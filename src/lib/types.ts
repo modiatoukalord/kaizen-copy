@@ -30,11 +30,6 @@ export const ExpenseSubCategory = {
   ],
   Transport: [
     'Transport'
-  ],
-  Entreprise: [
-    'Salaire',
-    'Factures',
-    'Autre',
   ]
 } as const;
 
@@ -42,7 +37,6 @@ const allSubCategories = [
     ...ExpenseSubCategory.Personnel,
     ...ExpenseSubCategory.Maison,
     ...ExpenseSubCategory.Transport,
-    ...ExpenseSubCategory.Entreprise
 ];
 
 export const AllExpenseSubCategories = [...new Set(allSubCategories)].sort((a,b) => a.localeCompare(b)) as (
@@ -56,7 +50,6 @@ export const AllExpenseSubCategories = [...new Set(allSubCategories)].sort((a,b)
   'Nourriture' |
   'Prêt' |
   'Remboursement' |
-  'Salaire' |
   'Transport' |
   'Travaux' |
   'Vacances et voyage' |
@@ -77,12 +70,6 @@ export const TransactionAccount = [
     'Espèces'
 ] as const;
 
-export const TransactionScope = [
-  'Personnel',
-  'Entreprise'
-] as const;
-
-export type Scope = (typeof TransactionScope)[number];
 export type Account = (typeof TransactionAccount)[number];
 export type Category = (typeof TransactionCategory)[number];
 export type IncomeCategoryType = (typeof IncomeCategory)[number];
@@ -95,7 +82,6 @@ export type Transaction = {
   date: string; // ISO 8601 format
   description: string;
   amount: number;
-  scope: Scope;
   parentCategory?: ExpenseParentCategoryType;
   category: Category;
   account: Account;

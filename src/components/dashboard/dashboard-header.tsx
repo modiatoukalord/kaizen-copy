@@ -18,8 +18,8 @@ import {
 import { useCurrency } from '@/contexts/currency-context';
 import { useEffect, useMemo, useState } from 'react';
 import { getTransactions } from '@/lib/data';
-import type { Transaction, Category, Transfer, Scope } from '@/lib/types';
-import { format, startOfMonth, endOfMonth, isWithinInterval, isFuture, differenceInDays } from 'date-fns';
+import type { Transaction, Category, Transfer } from '@/lib/types';
+import { startOfMonth, endOfMonth, isWithinInterval, isFuture, differenceInDays } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 
 
@@ -33,7 +33,6 @@ type CalendarEvent = {
   date: Date;
   description: string;
   amount: number;
-  scope: Scope;
 };
 
 
@@ -44,9 +43,6 @@ export default function DashboardHeader() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
    const [events, setEvents] = useState<CalendarEvent[]>([]);
-
-   const scope: Scope = (searchParams.get('scope') as Scope) || 'Personnel';
-
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -90,9 +86,9 @@ export default function DashboardHeader() {
   const upcomingEventsCount = useMemo(() => {
     const today = new Date();
     return events.filter(event => 
-        event.scope === scope && isFuture(event.date) && differenceInDays(event.date, today) <= 7
+        isFuture(event.date) && differenceInDays(event.date, today) <= 7
     ).length;
-  }, [events, scope]);
+  }, [events]);
 
   const totalAlerts = overBudgetItemsCount + upcomingEventsCount;
 
@@ -126,12 +122,11 @@ export default function DashboardHeader() {
 
       <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:justify-center md:gap-5 md:text-sm lg:gap-6">
         {navItems.map((item) => {
-            const finalHref = item.href === '/' || item.href === '/transfers' ? item.href : `${item.href}?scope=${scope}`;
             const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
             return (
                 <Link
                 key={item.href}
-                href={finalHref}
+                href={item.href}
                 className={cn(
                     'text-muted-foreground transition-colors hover:text-foreground flex items-center gap-2',
                     isActive && 'text-foreground'
@@ -166,7 +161,7 @@ export default function DashboardHeader() {
                   </Button>
               </AddTransferSheet>
           ) : (
-              <AddTransactionSheet type={transactionType} scope={scope}>
+              <AddTransactionSheet type={transactionType}>
                   <Button>
                       <PlusCircle className="mr-2 h-4 w-4" />
                       Ajouter une transaction
