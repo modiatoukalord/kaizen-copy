@@ -46,9 +46,9 @@ export default function StatCards({ transactions, transfers, filterType }: StatC
         const gainPropre = income - totalCredit;
         return (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <StatCard title="Revenu total" value={income} icon={ArrowUpRight} />
-                <StatCard title="Total crédit" value={totalCredit} icon={ArrowLeftRight} />
-                <StatCard title="Gain propre" value={gainPropre} icon={DollarSign} />
+                <StatCard title="Revenu total" value={income} icon={ArrowUpRight} tooltipText="Total de tous les revenus enregistrés pour la période." />
+                <StatCard title="Total crédit" value={totalCredit} icon={ArrowLeftRight} tooltipText="Total des montants reçus en tant que crédit." />
+                <StatCard title="Gain propre" value={gainPropre} icon={DollarSign} tooltipText="Revenu total moins les crédits reçus (Revenu - Crédit)." />
             </div>
         );
     }
@@ -60,9 +60,9 @@ export default function StatCards({ transactions, transfers, filterType }: StatC
         
         return (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <StatCard title="Total des dépenses" value={expenses} icon={ArrowDownLeft} />
-                <StatCard title="Total investissement" value={totalInvestissement} icon={TrendingUp} />
-                <StatCard title="Total remboursement" value={totalRemboursement} icon={CircleArrowLeft} />
+                <StatCard title="Total des dépenses" value={expenses} icon={ArrowDownLeft} tooltipText="Total de toutes les dépenses enregistrées pour la période."/>
+                <StatCard title="Total investissement" value={totalInvestissement} icon={TrendingUp} tooltipText="Total des montants dépensés en investissements." />
+                <StatCard title="Total remboursement" value={totalRemboursement} icon={CircleArrowLeft} tooltipText="Total des montants que vous avez remboursés." />
             </div>
         );
     }
@@ -97,12 +97,12 @@ export default function StatCards({ transactions, transfers, filterType }: StatC
 
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-            <StatCard title="Solde net" value={balance} icon={DollarSign} />
+            <StatCard title="Solde net" value={balance} icon={DollarSign} tooltipText="Différence entre vos revenus et vos dépenses (Revenus - Dépenses)." />
             {accountBalances.map(item => (
-                <StatCard key={item.account} title={`Solde ${item.account}`} value={item.balance} icon={accountIcons[item.account]} />
+                <StatCard key={item.account} title={`Solde ${item.account}`} value={item.balance} icon={accountIcons[item.account]} tooltipText={`Solde actuel pour le compte ${item.account}.`}/>
             ))}
-            <StatCard title="Crédits restants" value={creditRestant} icon={ArrowLeftRight} />
-            <StatCard title="Prêts nets" value={pretNet} icon={TrendingUp} />
+            <StatCard title="Crédits restants" value={creditRestant} icon={ArrowLeftRight} tooltipText="Montant total des crédits que vous devez encore rembourser (Crédit - Remboursement)." />
+            <StatCard title="Prêts nets" value={pretNet} icon={TrendingUp} tooltipText="Montant net que d'autres vous doivent (Créances - Prêts)." />
         </div>
     );
 }
