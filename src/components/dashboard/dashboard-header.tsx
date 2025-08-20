@@ -2,8 +2,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { PiggyBank, PlusCircle, ArrowRightLeft, Bell } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { PiggyBank, PlusCircle, ArrowRightLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AddTransactionSheet } from './add-transaction-sheet';
 import { AddTransferSheet } from './add-transfer-sheet';
@@ -16,82 +16,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCurrency } from '@/contexts/currency-context';
-import { useEffect, useMemo, useState } from 'react';
-import { getTransactions } from '@/lib/data';
-import type { Transaction, Category, Transfer } from '@/lib/types';
-import { startOfMonth, endOfMonth, isWithinInterval, isFuture, differenceInDays } from 'date-fns';
-import { Badge } from '@/components/ui/badge';
-
-
-type BudgetItem = {
-    category: Category;
-    planned: number;
-};
-
-type CalendarEvent = {
-  id: string;
-  date: Date;
-  description: string;
-  amount: number;
-};
-
 
 export default function DashboardHeader() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { currency, setCurrency } = useCurrency();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
-   const [events, setEvents] = useState<CalendarEvent[]>([]);
-
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      const allTransactions = await getTransactions();
-      setTransactions(allTransactions);
-    };
-    fetchTransactions();
-    
-    // Initialize state that depends on browser APIs here
-    setBudgetItems([
-        { category: 'Nourriture', planned: 200000 },
-        { category: 'Transport', planned: 50000 },
-        { category: 'Divertissement', planned: 75000 },
-    ]);
-  }, []);
-
-  const monthlyTransactions = useMemo(() => {
-    const now = new Date();
-    const startDate = startOfMonth(now);
-    const endDate = endOfMonth(now);
-    const interval = { start: startDate, end: endDate };
-    return transactions.filter(t => t.type === 'expense' && isWithinInterval(new Date(t.date), interval));
-  }, [transactions]);
-
-  const budgetWithSpent = useMemo(() => {
-    const spentByCategory = monthlyTransactions.reduce((acc, t) => {
-        acc[t.category] = (acc[t.category] || 0) + t.amount;
-        return acc;
-    }, {} as Record<Category, number>);
-
-    return budgetItems.map(item => ({
-        ...item,
-        spent: spentByCategory[item.category] || 0,
-    }));
-  }, [budgetItems, monthlyTransactions]);
-
-  const overBudgetItemsCount = useMemo(() => {
-    return budgetWithSpent.filter(item => item.planned - item.spent < 0).length;
-  }, [budgetWithSpent]);
-  
-  const upcomingEventsCount = useMemo(() => {
-    const today = new Date();
-    return events.filter(event => 
-        isFuture(event.date) && differenceInDays(event.date, today) <= 7
-    ).length;
-  }, [events]);
-
-  const totalAlerts = overBudgetItemsCount + upcomingEventsCount;
-
 
   const navItems = [
     { href: '/', label: 'Tableau de bord' },
@@ -99,7 +27,7 @@ export default function DashboardHeader() {
     { href: '/expenses', label: 'Dépenses' },
     { href: '/transfers', label: 'Virements' },
     { href: '/charts', label: 'Graphiques' },
-    { href: '/planning', label: 'Planning', alerts: totalAlerts },
+    { href: '/planning', label: 'Planning' },
   ];
 
   const transactionType = (() => {
@@ -120,7 +48,7 @@ export default function DashboardHeader() {
         </Link>
       </div>
 
-      <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:justify-center md:gap-5 md:text-sm lg:gap-6">
+      <nav className="hidden flex-col items-center justify-center gap-6 text-lg font-medium md:flex md:flex-row md:gap-2 lg:gap-4">
         {navItems.map((item) => {
             const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
             return (
@@ -128,14 +56,11 @@ export default function DashboardHeader() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                    'text-muted-foreground transition-colors hover:text-foreground flex items-center gap-2',
-                    isActive && 'text-foreground'
+                    'transition-colors hover:text-foreground rounded-md px-3 py-2 text-sm font-medium',
+                    isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground'
                 )}
                 >
                 {item.label}
-                {item.alerts !== undefined && item.alerts > 0 && (
-                    <Badge variant="destructive" className="h-5 w-5 justify-center rounded-full p-0">{item.alerts}</Badge>
-                )}
                 </Link>
             );
         })}
