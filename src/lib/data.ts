@@ -1,7 +1,7 @@
 
 import { db } from './firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, Timestamp } from 'firebase/firestore';
-import type { Transaction, Transfer } from './types';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, Timestamp, where, writeBatch } from 'firebase/firestore';
+import type { Transaction, Transfer, BudgetItem, CalendarEvent } from './types';
 
 // In a real application, you would use a proper database.
 
@@ -85,3 +85,65 @@ export const deleteTransfer = async (id: string) => {
     const transferDoc = doc(db, 'transfers', id);
     await deleteDoc(transferDoc);
 }
+
+
+// --- Planning Page Data ---
+
+export const getBudgetItems = async (year: number, month: string): Promise<BudgetItem[]> => {
+    const budgetCol = collection(db, 'budgets');
+    const q = query(budgetCol, where('year', '==', year), where('month', '==', month));
+    const budgetSnapshot = await getDocs(q);
+    if (budgetSnapshot.empty) {
+        return [];
+    }
+    // Assuming one budget doc per month/year
+    const budgetDoc = budgetSnapshot.docs[0];
+    return (budgetDoc.data().items as BudgetItem[]).map(item => ({...item, id: item.id || crypto.randomUUID()}));
+};
+
+export const saveBudgetItems = async (year: number, month: string, items: BudgetItem[]) => {
+    const budgetCol = collection(db, 'budgets');
+    const q = query(budgetCol, where('year', '==', year), where('month', '==', month));
+    const budgetSnapshot = await getDocs(q);
+
+    const dataToSave = {
+        year,
+        month,
+        items: items.map(({ id, ...rest }) => rest), // Don't save randomUUID to firestore
+    };
+
+    if (budgetSnapshot.empty) {
+        await addDoc(budgetCol, dataToSave);
+    } else {
+        const docId = budgetSnapshot.docs[0].id;
+        const budgetDoc = doc(db, 'budgets', docId);
+        await updateDoc(budgetDoc, dataToSave);
+    }
+};
+
+export const getCalendarEvents = async (): Promise<CalendarEvent[]> => {
+    const eventsCol = collection(db, 'calendarEvents');
+    const q = query(eventsCol, orderBy('date', 'desc'));
+    const eventsSnapshot = await getDocs(q);
+    return eventsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            ...data,
+            date: (data.date as Timestamp).toDate().toISOString(),
+        } as CalendarEvent;
+    });
+};
+
+export const addCalendarEvent = async (event: Omit<CalendarEvent, 'id'>) => {
+    const eventsCol = collection(db, 'calendarEvents');
+    await addDoc(eventsCol, {
+        ...event,
+        date: new Date(event.date),
+    });
+};
+
+export const deleteCalendarEvent = async (id: string) => {
+    const eventDoc = doc(db, 'calendarEvents', id);
+    await deleteDoc(eventDoc);
+};

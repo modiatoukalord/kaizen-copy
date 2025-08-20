@@ -100,3 +100,16 @@ export type Transfer = {
 export type Period = 'weekly' | 'monthly' | 'quarterly' | 'annually';
 
 export type CategorizeResult = Awaited<ReturnType<typeof categorizeTransaction>>;
+
+export type BudgetItem = {
+  id: string;
+  category: ExpenseSubCategoryType;
+  planned: number;
+};
+
+export type CalendarEvent = {
+  id: string;
+  date: string; // ISO 8601 format
+  description: string;
+  amount: number;
+};

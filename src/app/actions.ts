@@ -4,8 +4,8 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { categorizeTransaction as categorizeTransactionFlow } from '@/ai/flows/categorize-transaction';
-import { TransactionCategory, TransactionAccount, type CategorizeTransactionInput, ExpenseParentCategory } from '@/lib/types';
-import { addTransaction as dbAddTransaction, getTransactions, updateTransaction as dbUpdateTransaction, deleteTransaction as dbDeleteTransaction, addTransfer as dbAddTransfer, updateTransfer as dbUpdateTransfer, deleteTransfer as dbDeleteTransfer } from '@/lib/data';
+import { TransactionCategory, TransactionAccount, type CategorizeTransactionInput, ExpenseParentCategory, AllExpenseSubCategories } from '@/lib/types';
+import { addTransaction as dbAddTransaction, getTransactions, updateTransaction as dbUpdateTransaction, deleteTransaction as dbDeleteTransaction, addTransfer as dbAddTransfer, updateTransfer as dbUpdateTransfer, deleteTransfer as dbDeleteTransfer, getBudgetItems, saveBudgetItems, getCalendarEvents, addCalendarEvent, deleteCalendarEvent } from '@/lib/data';
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -29,6 +29,24 @@ const transferFormSchema = z.object({
     message: "Les comptes de départ et d'arrivée doivent être différents.",
     path: ["toAccount"],
 });
+
+const budgetItemSchema = z.object({
+  id: z.string(),
+  category: z.enum(AllExpenseSubCategories),
+  planned: z.coerce.number().min(0),
+});
+
+const budgetFormSchema = z.object({
+  year: z.coerce.number(),
+  month: z.string(),
+  items: z.array(budgetItemSchema),
+});
+
+const calendarEventSchema = z.object({
+  description: z.string().min(1, 'La description est requise'),
+  amount: z.coerce.number().min(0.01, 'Le montant est requis'),
+  date: z.string().min(1, 'La date est requise'),
+})
 
 
 export async function handleAddOrUpdateTransaction(prevState: any, formData: FormData) {
@@ -141,5 +159,69 @@ export async function suggestCategory(description: string, amount: number) {
   } catch (error) {
     console.error('La catégorisation par IA a échoué:', error);
     return null;
+  }
+}
+
+export async function fetchBudgetItems(year: number, month: string) {
+    return getBudgetItems(year, month);
+}
+
+export async function handleSaveBudget(prevState: any, formData: FormData) {
+    const rawData = {
+        year: formData.get('year'),
+        month: formData.get('month'),
+        items: JSON.parse(formData.get('items') as string)
+    }
+    const validatedFields = budgetFormSchema.safeParse(rawData);
+    
+    if (!validatedFields.success) {
+        console.error(validatedFields.error);
+        return {
+            message: 'Données invalides.',
+            success: false,
+        };
+    }
+    
+    try {
+        await saveBudgetItems(validatedFields.data.year, validatedFields.data.month, validatedFields.data.items);
+        revalidatePath('/planning');
+        return { message: 'Budget enregistré avec succès.', success: true };
+    } catch (error) {
+        console.error(error);
+        return { message: 'Erreur lors de l\'enregistrement du budget.', success: false };
+    }
+}
+
+export async function fetchCalendarEvents() {
+    return getCalendarEvents();
+}
+
+export async function handleAddCalendarEvent(prevState: any, formData: FormData) {
+  const validatedFields = calendarEventSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Erreur: Veuillez vérifier les champs du formulaire.',
+      success: false,
+    };
+  }
+
+  try {
+    await addCalendarEvent({ ...validatedFields.data, date: new Date(validatedFields.data.date).toISOString() });
+    revalidatePath('/planning');
+    return { message: 'Événement ajouté avec succès.', success: true, errors: {} };
+  } catch (error) {
+    return { message: 'Erreur lors de l\'ajout de l\'événement.', success: false, errors: {} };
+  }
+}
+
+export async function handleDeleteCalendarEvent(id: string) {
+  try {
+    await deleteCalendarEvent(id);
+    revalidatePath('/planning');
+    return { message: 'Événement supprimé avec succès.', success: true };
+  } catch (error) {
+    return { message: 'Erreur lors de la suppression de l\'événement.', success: false };
   }
 }

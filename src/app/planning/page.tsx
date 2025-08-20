@@ -1,70 +1,89 @@
 
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useTransition } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PlusCircle, Trash2, AlertTriangle, Bell } from 'lucide-react';
+import { PlusCircle, Trash2, AlertTriangle, Bell, Save } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ExpenseSubCategory, AllExpenseSubCategories } from '@/lib/types';
-import type { Category, Transaction, ExpenseSubCategoryType } from '@/lib/types';
+import { AllExpenseSubCategories } from '@/lib/types';
+import type { Category, Transaction, ExpenseSubCategoryType, BudgetItem, CalendarEvent } from '@/lib/types';
 import { getTransactions } from '@/lib/data';
+import { fetchBudgetItems, handleSaveBudget, fetchCalendarEvents, handleAddCalendarEvent, handleDeleteCalendarEvent } from '@/app/actions';
 import { format, startOfMonth, endOfMonth, isWithinInterval, getYear, isSameDay, isFuture, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useCurrency } from '@/contexts/currency-context';
 import { formatCurrency } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useFormState } from 'react-dom';
+import { toast } from '@/hooks/use-toast';
 
-
-type BudgetItem = {
-    id: string;
-    category: ExpenseSubCategoryType;
-    planned: number;
+const initialAddEventState = {
+  message: '',
+  errors: {},
+  success: false,
 };
 
-type CalendarEvent = {
-  id: string;
-  date: Date;
-  description: string;
-  amount: number;
-};
 
 export default function PlanningPage() {
   const { currency } = useCurrency();
+  const [isPending, startTransition] = useTransition();
 
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [selectedMonth, setSelectedMonth] = useState<string>('');
-  const [selectedYear, setSelectedYear] = useState<number>(0);
+  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'MM'));
+  const [selectedYear, setSelectedYear] = useState<number>(getYear(new Date()));
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [newEventDescription, setNewEventDescription] = useState('');
-  const [newEventAmount, setNewEventAmount] = useState<number | ''>('');
 
+  const [addEventState, addEventFormAction] = useFormState(handleAddCalendarEvent, initialAddEventState);
 
   useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchAndSetTransactions = async () => {
       const allTransactions = await getTransactions();
       setTransactions(allTransactions);
     };
-    fetchTransactions();
+    fetchAndSetTransactions();
     
-    // Initialize state that depends on browser APIs here
-    setSelectedDate(new Date());
-    setSelectedMonth(format(new Date(), 'MM'));
-    setSelectedYear(getYear(new Date()));
-    setBudgetItems([
-      { id: crypto.randomUUID(), category: 'Nourriture', planned: 200000 },
-      { id: crypto.randomUUID(), category: 'Transport', planned: 50000 },
-      { id: crypto.randomUUID(), category: 'Divertissement', planned: 75000 },
-    ]);
+    const fetchAndSetEvents = async () => {
+        const calendarEvents = await fetchCalendarEvents();
+        setEvents(calendarEvents);
+    };
+    fetchAndSetEvents();
 
   }, []);
-  
+
+  useEffect(() => {
+    const fetchAndSetBudgetItems = async () => {
+      const items = await fetchBudgetItems(selectedYear, selectedMonth);
+      if (items && items.length > 0) {
+        setBudgetItems(items);
+      } else {
+        // Set default if no budget is found for the month
+        setBudgetItems([
+          { id: crypto.randomUUID(), category: 'Nourriture', planned: 200000 },
+          { id: crypto.randomUUID(), category: 'Transport', planned: 50000 },
+          { id: crypto.randomUUID(), category: 'Divertissement', planned: 75000 },
+        ]);
+      }
+    };
+    fetchAndSetBudgetItems();
+  }, [selectedYear, selectedMonth]);
+
+  useEffect(() => {
+    if (addEventState.success) {
+        toast({ title: "Succès", description: addEventState.message });
+        (document.getElementById('add-event-form') as HTMLFormElement)?.reset();
+        fetchCalendarEvents().then(setEvents); // Re-fetch events
+    } else if (addEventState.message && !addEventState.success) {
+        toast({ variant: "destructive", title: "Erreur", description: addEventState.message });
+    }
+  }, [addEventState]);
+
   const years = useMemo(() => {
     const currentYear = getYear(new Date());
     const yearOptions = [];
@@ -75,15 +94,10 @@ export default function PlanningPage() {
   }, []);
 
   const months = useMemo(() => {
-    const monthOptions = [];
-    for (let i = 0; i < 12; i++) {
-      const date = new Date(2000, i, 1); // Use a dummy year
-      monthOptions.push({
-        value: format(date, 'MM'),
-        label: format(date, 'MMMM', { locale: fr }),
-      });
-    }
-    return monthOptions;
+    return Array.from({ length: 12 }, (_, i) => ({
+      value: format(new Date(2000, i), 'MM'),
+      label: format(new Date(2000, i), 'MMMM', { locale: fr }),
+    }));
   }, []);
 
   const monthlyTransactions = useMemo(() => {
@@ -113,13 +127,13 @@ export default function PlanningPage() {
   const upcomingEvents = useMemo(() => {
     const today = new Date();
     return events.filter(event => 
-        isFuture(event.date) && differenceInDays(event.date, today) <= 7
-    ).sort((a,b) => a.date.getTime() - b.date.getTime());
+        isFuture(new Date(event.date)) && differenceInDays(new Date(event.date), today) <= 7
+    ).sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [events]);
   
   const eventsForSelectedDate = useMemo(() => {
     if (!selectedDate) return [];
-    return events.filter(event => isSameDay(event.date, selectedDate));
+    return events.filter(event => isSameDay(new Date(event.date), selectedDate));
   }, [events, selectedDate]);
 
 
@@ -141,21 +155,31 @@ export default function PlanningPage() {
     setBudgetItems(newItems);
   };
   
-  const handleAddEvent = () => {
-    if (!selectedDate || !newEventDescription || newEventAmount === '') return;
-    const newEvent: CalendarEvent = {
-        id: crypto.randomUUID(),
-        date: selectedDate,
-        description: newEventDescription,
-        amount: Number(newEventAmount),
-    };
-    setEvents([...events, newEvent]);
-    setNewEventDescription('');
-    setNewEventAmount('');
+  const onSaveBudget = () => {
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('year', String(selectedYear));
+      formData.append('month', selectedMonth);
+      formData.append('items', JSON.stringify(budgetItems));
+      const result = await handleSaveBudget(null, formData);
+      if (result.success) {
+        toast({ title: 'Succès', description: result.message });
+      } else {
+        toast({ variant: 'destructive', title: 'Erreur', description: result.message });
+      }
+    });
   };
 
   const handleRemoveEvent = (eventId: string) => {
-    setEvents(events.filter(event => event.id !== eventId));
+     startTransition(async () => {
+        const result = await handleDeleteCalendarEvent(eventId);
+        if (result.success) {
+            toast({ title: "Succès", description: result.message });
+            fetchCalendarEvents().then(setEvents); // Re-fetch
+        } else {
+            toast({ variant: "destructive", title: "Erreur", description: result.message });
+        }
+    });
   };
   
   return (
@@ -260,10 +284,16 @@ export default function PlanningPage() {
                         ))}
                     </TableBody>
                 </Table>
-                <Button onClick={handleAddItem} className="mt-4">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Ajouter une ligne
-                </Button>
+                <div className="flex justify-between items-center mt-4">
+                    <Button onClick={handleAddItem}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Ajouter une ligne
+                    </Button>
+                     <Button onClick={onSaveBudget} disabled={isPending}>
+                        <Save className="mr-2 h-4 w-4" />
+                        Enregistrer le budget
+                    </Button>
+                </div>
             </CardContent>
           </Card>
         </div>
@@ -282,7 +312,7 @@ export default function PlanningPage() {
                                 <ul className="text-sm">
                                     {upcomingEvents.map(event => (
                                         <li key={event.id}>
-                                            {format(event.date, 'dd/MM')}: {event.description} ({formatCurrency(event.amount, currency)})
+                                            {format(new Date(event.date), 'dd/MM')}: {event.description} ({formatCurrency(event.amount, currency)})
                                         </li>
                                     ))}
                                 </ul>
@@ -296,49 +326,50 @@ export default function PlanningPage() {
                         className="rounded-md border"
                         locale={fr}
                     />
-                    <div className="mt-4 space-y-4">
+                    <form action={addEventFormAction} id="add-event-form" className="mt-4 space-y-4">
                         <div>
                             <Label htmlFor="event-description">Nouvel événement</Label>
                             <div className='flex gap-2'>
                                 <Input 
-                                    id="event-description" 
+                                    id="event-description"
+                                    name="description" 
                                     placeholder="Ex: Facture SENELEC" 
-                                    value={newEventDescription}
-                                    onChange={(e) => setNewEventDescription(e.target.value)}
                                 />
                                 <Input 
                                     type="number" 
+                                    name="amount"
                                     placeholder="Montant" 
-                                    value={newEventAmount}
-                                    onChange={(e) => setNewEventAmount(e.target.value === '' ? '' : Number(e.target.value))}
                                     className="w-[120px]"
                                 />
+                                <input type="hidden" name="date" value={selectedDate?.toISOString() || ''} />
                             </div>
-                            <Button onClick={handleAddEvent} className='w-full mt-2'>Ajouter l'événement</Button>
+                             {addEventState.errors?.description && <p className="text-sm text-destructive">{addEventState.errors.description[0]}</p>}
+                             {addEventState.errors?.amount && <p className="text-sm text-destructive">{addEventState.errors.amount[0]}</p>}
+                            <Button type="submit" className='w-full mt-2'>Ajouter l'événement</Button>
                         </div>
+                    </form>
                         
-                        {selectedDate && (
-                            <div>
-                                <h4 className="font-medium mb-2">
-                                    Événements pour le {format(selectedDate, 'd MMMM yyyy', { locale: fr })}
-                                </h4>
-                                {eventsForSelectedDate.length > 0 ? (
-                                    <ul className='space-y-2'>
-                                        {eventsForSelectedDate.map(event => (
-                                            <li key={event.id} className="flex items-center justify-between text-sm p-2 rounded-md bg-muted/50">
-                                                <span>{event.description} - {formatCurrency(event.amount, currency)}</span>
-                                                <Button variant="ghost" size="icon" onClick={() => handleRemoveEvent(event.id)}>
-                                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                                </Button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p className="text-sm text-muted-foreground">Aucun événement pour cette date.</p>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                    {selectedDate && (
+                        <div className="mt-4">
+                            <h4 className="font-medium mb-2">
+                                Événements pour le {format(selectedDate, 'd MMMM yyyy', { locale: fr })}
+                            </h4>
+                            {eventsForSelectedDate.length > 0 ? (
+                                <ul className='space-y-2'>
+                                    {eventsForSelectedDate.map(event => (
+                                        <li key={event.id} className="flex items-center justify-between text-sm p-2 rounded-md bg-muted/50">
+                                            <span>{event.description} - {formatCurrency(event.amount, currency)}</span>
+                                            <Button variant="ghost" size="icon" onClick={() => handleRemoveEvent(event.id)}>
+                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                            </Button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">Aucun événement pour cette date.</p>
+                            )}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>
