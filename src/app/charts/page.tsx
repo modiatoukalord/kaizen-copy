@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getTransactions } from '@/lib/data';
 import IncomeExpenseChart from '@/components/dashboard/income-expense-chart';
@@ -11,7 +11,7 @@ import { subMonths, format, startOfMonth, endOfMonth, isWithinInterval, getYear 
 import { fr } from 'date-fns/locale';
 import type { Transaction } from '@/lib/types';
 
-export default function ChartsPage() {
+function ChartsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -92,4 +92,13 @@ export default function ChartsPage() {
       </div>
     </div>
   );
+}
+
+
+export default function ChartsPage() {
+  return (
+    <Suspense fallback={<div>Chargement...</div>}>
+      <ChartsContent />
+    </Suspense>
+  )
 }
