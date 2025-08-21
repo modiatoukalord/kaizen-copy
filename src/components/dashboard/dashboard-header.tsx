@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCurrency } from '@/contexts/currency-context';
-import { Sheet, SheetTrigger, SheetContent, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetTrigger, SheetContent, SheetClose, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useState } from 'react';
 
 export default function DashboardHeader() {
@@ -109,11 +109,18 @@ export default function DashboardHeader() {
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="left">
-                    <nav className="grid gap-6 text-lg font-medium">
-                        <Link href="/" className="flex items-center gap-2 text-lg font-semibold" onClick={() => setIsSheetOpen(false)}>
-                            <PiggyBank className="h-6 w-6 text-primary" />
-                            <span className="font-headline">Le KAIZEN</span>
-                        </Link>
+                    <SheetHeader>
+                        <SheetTitle>
+                            <Link href="/" className="flex items-center gap-2 text-lg font-semibold" onClick={() => setIsSheetOpen(false)}>
+                                <PiggyBank className="h-6 w-6 text-primary" />
+                                <span className="font-headline">Le KAIZEN</span>
+                            </Link>
+                        </SheetTitle>
+                        <SheetDescription>
+                            Navigation principale
+                        </SheetDescription>
+                    </SheetHeader>
+                    <nav className="grid gap-6 text-lg font-medium mt-4">
                         {navItems.map((item) => {
                              const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
                              return (
