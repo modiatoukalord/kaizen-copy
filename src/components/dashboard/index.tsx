@@ -80,44 +80,11 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
     } else if (filterType === 'expense') {
       categories = AllExpenseSubCategories;
     } else {
-      // For the main dashboard, show all categories
       categories = [...IncomeCategory, ...AllExpenseSubCategories];
     }
     return categories.map(cat => ({ label: cat, value: cat }));
   }, [filterType]);
 
-
-  if (filterType) {
-    return (
-        <>
-            <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{title}</h1>
-            <Tabs value={period} onValueChange={(value) => setPeriod(value as Period)} className="space-y-4">
-                <TabsList>
-                <TabsTrigger value="weekly">Hebdomadaire</TabsTrigger>
-                <TabsTrigger value="monthly">Mensuel</TabsTrigger>
-                <TabsTrigger value="quarterly">Trimestriel</TabsTrigger>
-                <TabsTrigger value="annually">Annuel</TabsTrigger>
-                </TabsList>
-            </Tabs>
-            </div>
-            
-            <StatCards transactions={filteredData.transactions} transfers={filteredData.transfers} filterType={filterType} />
-            
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <div className="col-span-4 lg:col-span-7">
-                    <TransactionsTable 
-                        transactions={allTransactionsForType} 
-                        filterType={filterType}
-                        categoryOptions={categoryOptions}
-                        globalFilter={globalFilter}
-                        onGlobalFilterChange={setGlobalFilter}
-                    />
-                </div>
-            </div>
-        </>
-    )
-  }
 
   return (
     <>
@@ -135,8 +102,22 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
         
         <StatCards transactions={filteredData.transactions} transfers={filteredData.transfers} filterType={filterType} />
         
-        <div className="grid gap-4">
-            <SummaryChart transactions={filteredData.transactions} period={period} />
+        {!hideCharts && (
+            <div className="grid gap-4">
+                <SummaryChart transactions={filteredData.transactions} period={period} />
+            </div>
+        )}
+        
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <div className="col-span-4 lg:col-span-7">
+                <TransactionsTable 
+                    transactions={allTransactionsForType} 
+                    filterType={filterType}
+                    categoryOptions={categoryOptions}
+                    globalFilter={globalFilter}
+                    onGlobalFilterChange={setGlobalFilter}
+                />
+            </div>
         </div>
     </>
   );
