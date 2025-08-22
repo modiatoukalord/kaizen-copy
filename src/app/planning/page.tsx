@@ -322,13 +322,15 @@ export default function PlanningPage() {
                             </AlertDescription>
                         </Alert>
                     )}
-                    <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={setSelectedDate}
-                        className="rounded-md border"
-                        locale={fr}
-                    />
+                    <div className="overflow-x-auto">
+                        <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={setSelectedDate}
+                            className="rounded-md border inline-block"
+                            locale={fr}
+                        />
+                    </div>
                     <form action={addEventFormAction} id="add-event-form" className="mt-4 space-y-4">
                         <div>
                             <Label htmlFor="event-description">Nouvel événement</Label>
