@@ -126,19 +126,25 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
         
         {!hideCharts && (
             <div className="grid gap-4">
-                <SummaryChart transactions={filteredData.transactions} period={period} />
+                <div className="overflow-x-auto">
+                    <div className="min-w-[600px]">
+                        <SummaryChart transactions={filteredData.transactions} period={period} />
+                    </div>
+                </div>
             </div>
         )}
         
         <div className="grid gap-4">
             <div className="col-span-1">
-                <TransactionsTable 
-                    transactions={allTransactionsForType} 
-                    filterType={filterType}
-                    categoryOptions={categoryOptions}
-                    globalFilter={globalFilter}
-                    onGlobalFilterChange={setGlobalFilter}
-                />
+                <div className="overflow-x-auto">
+                    <TransactionsTable 
+                        transactions={allTransactionsForType} 
+                        filterType={filterType}
+                        categoryOptions={categoryOptions}
+                        globalFilter={globalFilter}
+                        onGlobalFilterChange={setGlobalFilter}
+                    />
+                </div>
             </div>
         </div>
     </>

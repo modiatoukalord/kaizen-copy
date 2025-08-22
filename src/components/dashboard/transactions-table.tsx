@@ -252,7 +252,6 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
         
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -283,7 +282,6 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
               )}
             </TableBody>
           </Table>
-        </div>
       </CardContent>
     </Card>
   );

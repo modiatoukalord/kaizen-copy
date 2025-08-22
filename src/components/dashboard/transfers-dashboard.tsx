@@ -86,7 +86,6 @@ export default function TransfersDashboard({ initialTransfers }: TransfersDashbo
     {
       accessorKey: 'description',
       header: 'Description',
-      cell: ({ row }) => <div className="hidden md:table-cell">{row.original.description}</div>,
     },
     {
       accessorKey: 'fromAccount',
