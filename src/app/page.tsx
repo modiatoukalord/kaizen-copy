@@ -3,10 +3,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Dashboard from '@/components/dashboard';
 import { getTransactions, getTransfers } from '@/lib/data';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Eye } from 'lucide-react';
+import RecentActivityDialog from '@/components/dashboard/recent-activity-dialog';
+
 
 export default async function Home() {
   const initialTransactions = await getTransactions();
@@ -59,26 +58,10 @@ export default async function Home() {
                     <CardTitle>Activité Récente</CardTitle>
                 </CardHeader>
                 <CardContent className="flex items-center justify-center">
-                    <Dialog>
-                    <DialogTrigger asChild>
-                        <Button variant="outline" className="h-28 w-full flex-col gap-2 bg-background/75 hover:bg-accent/20 backdrop-blur-sm">
-                            <Eye className="h-12 w-12" />
-                            <span>Voir l'activité</span>
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
-                        <DialogHeader>
-                        <DialogTitle>Activité Récente</DialogTitle>
-                        </DialogHeader>
-                        <div className="overflow-y-auto flex-1 pr-6">
-                            <Dashboard 
-                                initialTransactions={initialTransactions}
-                                initialTransfers={initialTransfers}
-                                title=""
-                            />
-                        </div>
-                    </DialogContent>
-                    </Dialog>
+                    <RecentActivityDialog
+                        initialTransactions={initialTransactions}
+                        initialTransfers={initialTransfers}
+                    />
                 </CardContent>
             </Card>
        </div>
