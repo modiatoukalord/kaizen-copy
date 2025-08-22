@@ -16,12 +16,13 @@ import {
   parseISO,
 } from 'date-fns';
 import type { Transaction, Period, Category, Transfer } from '@/lib/types';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import StatCards from './stat-cards';
 import TransactionsTable from './transactions-table';
 import { IncomeCategory, AllExpenseSubCategories } from '@/lib/types';
 import SummaryChart from './summary-chart';
+import { Card, CardContent } from '../ui/card';
 
 
 interface DashboardProps {
@@ -112,41 +113,57 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
                 </SelectContent>
               </Select>
             </div>
-            <Tabs value={period} onValueChange={(value) => setPeriod(value as Period)} className="hidden md:block">
-              <TabsList>
-                {periodOptions.map(option => (
-                  <TabsTrigger key={option.value} value={option.value}>{option.label}</TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+            <div className="hidden md:block">
+                <Tabs value={period} onValueChange={(value) => setPeriod(value as Period)} className="hidden md:block">
+                <TabsList>
+                    {periodOptions.map(option => (
+                    <TabsTrigger key={option.value} value={option.value}>{option.label}</TabsTrigger>
+                    ))}
+                </TabsList>
+                </Tabs>
+            </div>
           </div>
         </div>
         
         <StatCards transactions={filteredData.transactions} transfers={filteredData.transfers} filterType={filterType} />
         
-        {!hideCharts && (
-            <div className="grid gap-4">
-                <div className="overflow-x-auto">
-                    <div className="min-w-[600px]">
-                        <SummaryChart transactions={filteredData.transactions} period={period} />
+        {!hideCharts ? (
+             <Tabs defaultValue="chart" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="chart">Graphique</TabsTrigger>
+                    <TabsTrigger value="table">Tableau</TabsTrigger>
+                </TabsList>
+                <TabsContent value="chart">
+                     <div className="overflow-x-auto">
+                        <div className="min-w-[600px]">
+                            <SummaryChart transactions={filteredData.transactions} period={period} />
+                        </div>
                     </div>
-                </div>
+                </TabsContent>
+                <TabsContent value="table">
+                     <div className="overflow-x-auto">
+                        <TransactionsTable 
+                            transactions={allTransactionsForType} 
+                            filterType={filterType}
+                            categoryOptions={categoryOptions}
+                            globalFilter={globalFilter}
+                            onGlobalFilterChange={setGlobalFilter}
+                        />
+                    </div>
+                </TabsContent>
+             </Tabs>
+        ) : (
+             <div className="overflow-x-auto">
+                <TransactionsTable 
+                    transactions={allTransactionsForType} 
+                    filterType={filterType}
+                    categoryOptions={categoryOptions}
+                    globalFilter={globalFilter}
+                    onGlobalFilterChange={setGlobalFilter}
+                />
             </div>
         )}
-        
-        <div className="grid gap-4">
-            <div className="col-span-1">
-                <div className="overflow-x-auto">
-                    <TransactionsTable 
-                        transactions={allTransactionsForType} 
-                        filterType={filterType}
-                        categoryOptions={categoryOptions}
-                        globalFilter={globalFilter}
-                        onGlobalFilterChange={setGlobalFilter}
-                    />
-                </div>
-            </div>
-        </div>
+       
     </>
   );
 }
