@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,15 +41,6 @@ export default function Home() {
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
              <DashboardActionItem href="/planning" imgSrc="/images/icons/planning.png" label="Planning" />
-          </CardContent>
-        </Card>
-
-        <Card className="bg-yellow-50/50 dark:bg-yellow-900/20 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Configuration</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
-             <DashboardActionItem href="#" imgSrc="/images/icons/settings.png" label="Paramètres" />
           </CardContent>
         </Card>
       </div>
