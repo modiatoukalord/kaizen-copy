@@ -1,8 +1,8 @@
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowUpRight, ArrowDownLeft, ArrowRightLeft, BarChart2, Calendar, Settings } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -21,9 +21,9 @@ export default function Home() {
             <CardTitle>Transactions</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <DashboardActionItem href="/income" icon={ArrowUpRight} label="Revenus" />
-            <DashboardActionItem href="/expenses" icon={ArrowDownLeft} label="Dépenses" />
-            <DashboardActionItem href="/transfers" icon={ArrowRightLeft} label="Virements" />
+            <DashboardActionItem href="/income" imgSrc="/images/icons/revenue.png" label="Revenus" />
+            <DashboardActionItem href="/expenses" imgSrc="/images/icons/depense.png" label="Dépenses" />
+            <DashboardActionItem href="/transfers" imgSrc="/images/icons/virement.png" label="Virements" />
           </CardContent>
         </Card>
 
@@ -32,7 +32,7 @@ export default function Home() {
             <CardTitle>Synthèse & Rapports</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <DashboardActionItem href="/charts" icon={BarChart2} label="Graphiques" />
+            <DashboardActionItem href="/charts" imgSrc="/images/icons/graph.png" label="Graphiques" />
           </CardContent>
         </Card>
 
@@ -41,7 +41,7 @@ export default function Home() {
             <CardTitle>Planification & Budget</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-             <DashboardActionItem href="/planning" icon={Calendar} label="Planning" />
+             <DashboardActionItem href="/planning" imgSrc="/images/icons/planning.png" label="Planning" />
           </CardContent>
         </Card>
 
@@ -50,7 +50,7 @@ export default function Home() {
             <CardTitle>Configuration</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-             <DashboardActionItem href="#" icon={Settings} label="Paramètres" />
+             <DashboardActionItem href="#" imgSrc="/images/icons/settings.png" label="Paramètres" />
           </CardContent>
         </Card>
       </div>
@@ -58,11 +58,11 @@ export default function Home() {
   );
 }
 
-function DashboardActionItem({ href, icon: Icon, label }: { href: string, icon: React.ElementType, label: string }) {
+function DashboardActionItem({ href, imgSrc, label }: { href: string, imgSrc: string, label: string }) {
   return (
     <Link href={href}>
       <Button variant="outline" className="h-28 w-full flex-col gap-2 bg-background/50 hover:bg-background/75 backdrop-blur-sm">
-        <Icon className="h-8 w-8 text-primary" />
+        <Image src={imgSrc} alt={label} width={48} height={48} className="h-12 w-12" />
         <span>{label}</span>
       </Button>
     </Link>
