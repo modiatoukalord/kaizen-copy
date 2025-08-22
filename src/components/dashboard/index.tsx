@@ -88,14 +88,14 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
 
   return (
     <>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{title}</h1>
           <Tabs value={period} onValueChange={(value) => setPeriod(value as Period)} className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="weekly">Hebdomadaire</TabsTrigger>
-              <TabsTrigger value="monthly">Mensuel</TabsTrigger>
-              <TabsTrigger value="quarterly">Trimestriel</TabsTrigger>
-              <TabsTrigger value="annually">Annuel</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+              <TabsTrigger value="weekly">Semaine</TabsTrigger>
+              <TabsTrigger value="monthly">Mois</TabsTrigger>
+              <TabsTrigger value="quarterly">Trimestre</TabsTrigger>
+              <TabsTrigger value="annually">Année</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>

@@ -53,14 +53,14 @@ function ChartsContent() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Graphiques</h1>
               <p className="text-muted-foreground">Visualisez vos données financières.</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full md:w-auto">
                 <Select value={String(selectedYear)} onValueChange={(value) => setSelectedYear(Number(value))}>
-                    <SelectTrigger className="w-[120px]">
+                    <SelectTrigger className="w-full md:w-[120px]">
                     <SelectValue placeholder="Année" />
                     </SelectTrigger>
                     <SelectContent>
@@ -72,7 +72,7 @@ function ChartsContent() {
                     </SelectContent>
                 </Select>
                 <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-full md:w-[180px]">
                     <SelectValue placeholder="Mois" />
                     </SelectTrigger>
                     <SelectContent>

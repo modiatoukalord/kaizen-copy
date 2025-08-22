@@ -192,14 +192,14 @@ export default function PlanningPage() {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div>
                         <CardTitle>Plan budgétaire</CardTitle>
                         <CardDescription>Définissez et suivez votre budget mensuel.</CardDescription>
                     </div>
-                     <div className="flex gap-2">
+                     <div className="flex gap-2 w-full md:w-auto">
                         <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                            <SelectTrigger className="w-[180px]">
+                            <SelectTrigger className="w-full md:w-[180px]">
                                 <SelectValue placeholder="Sélectionner un mois" />
                             </SelectTrigger>
                             <SelectContent>
@@ -211,7 +211,7 @@ export default function PlanningPage() {
                             </SelectContent>
                         </Select>
                         <Select value={String(selectedYear)} onValueChange={(value) => setSelectedYear(Number(value))}>
-                             <SelectTrigger className="w-[120px]">
+                             <SelectTrigger className="w-full md:w-[120px]">
                                 <SelectValue placeholder="Sélectionner une année" />
                             </SelectTrigger>
                             <SelectContent>
@@ -235,61 +235,63 @@ export default function PlanningPage() {
                         </AlertDescription>
                     </Alert>
                 )}
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Sous-catégorie</TableHead>
-                            <TableHead className="text-right">Prévu</TableHead>
-                            <TableHead className="text-right">Dépensé</TableHead>
-                            <TableHead className="text-right">Restant</TableHead>
-                            <TableHead></TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {budgetWithSpent.map((item) => (
-                            <TableRow key={item.id}>
-                                <TableCell className="w-[200px]">
-                                    <Select
-                                        value={item.category}
-                                        onValueChange={(value) => handleCategoryChange(item.id, value as ExpenseSubCategoryType)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Choisir une sous-catégorie" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {AllExpenseSubCategories.map((cat, index) => (
-                                                <SelectItem key={`${cat}-${index}`} value={cat}>
-                                                    {cat}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <Input 
-                                        type="number" 
-                                        value={item.planned}
-                                        onChange={(e) => handlePlannedChange(item.id, Number(e.target.value))}
-                                        className="text-right" 
-                                    />
-                                </TableCell>
-                                <TableCell className="text-right">{formatCurrency(item.spent, currency)}</TableCell>
-                                <TableCell className="text-right">{formatCurrency(item.planned - item.spent, currency)}</TableCell>
-                                <TableCell>
-                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(item.id)}>
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </TableCell>
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="min-w-[150px]">Sous-catégorie</TableHead>
+                                <TableHead className="text-right min-w-[120px]">Prévu</TableHead>
+                                <TableHead className="text-right min-w-[120px]">Dépensé</TableHead>
+                                <TableHead className="text-right min-w-[120px]">Restant</TableHead>
+                                <TableHead></TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-                <div className="flex justify-between items-center mt-4">
-                    <Button onClick={handleAddItem}>
+                        </TableHeader>
+                        <TableBody>
+                            {budgetWithSpent.map((item) => (
+                                <TableRow key={item.id}>
+                                    <TableCell>
+                                        <Select
+                                            value={item.category}
+                                            onValueChange={(value) => handleCategoryChange(item.id, value as ExpenseSubCategoryType)}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Choisir une sous-catégorie" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {AllExpenseSubCategories.map((cat, index) => (
+                                                    <SelectItem key={`${cat}-${index}`} value={cat}>
+                                                        {cat}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Input 
+                                            type="number" 
+                                            value={item.planned}
+                                            onChange={(e) => handlePlannedChange(item.id, Number(e.target.value))}
+                                            className="text-right" 
+                                        />
+                                    </TableCell>
+                                    <TableCell className="text-right">{formatCurrency(item.spent, currency)}</TableCell>
+                                    <TableCell className="text-right">{formatCurrency(item.planned - item.spent, currency)}</TableCell>
+                                    <TableCell>
+                                        <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(item.id)}>
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+                <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-4">
+                    <Button onClick={handleAddItem} className="w-full md:w-auto">
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Ajouter une ligne
                     </Button>
-                     <Button onClick={onSaveBudget} disabled={isPending}>
+                     <Button onClick={onSaveBudget} disabled={isPending} className="w-full md:w-auto">
                         <Save className="mr-2 h-4 w-4" />
                         Enregistrer le budget
                     </Button>
@@ -309,7 +311,7 @@ export default function PlanningPage() {
                             <Bell className="h-4 w-4" />
                             <AlertTitle>Événements à venir</AlertTitle>
                             <AlertDescription>
-                                <ul className="text-sm">
+                                <ul className="text-sm space-y-1">
                                     {upcomingEvents.map(event => (
                                         <li key={event.id}>
                                             {format(new Date(event.date), 'dd/MM')}: {event.description} ({formatCurrency(event.amount, currency)})
@@ -329,7 +331,7 @@ export default function PlanningPage() {
                     <form action={addEventFormAction} id="add-event-form" className="mt-4 space-y-4">
                         <div>
                             <Label htmlFor="event-description">Nouvel événement</Label>
-                            <div className='flex gap-2'>
+                            <div className='flex flex-col md:flex-row gap-2'>
                                 <Input 
                                     id="event-description"
                                     name="description" 
@@ -339,7 +341,7 @@ export default function PlanningPage() {
                                     type="number" 
                                     name="amount"
                                     placeholder="Montant" 
-                                    className="w-[120px]"
+                                    className="md:w-[120px]"
                                 />
                                 <input type="hidden" name="date" value={selectedDate?.toISOString() || ''} />
                             </div>

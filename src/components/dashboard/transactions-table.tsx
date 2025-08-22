@@ -93,7 +93,12 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
               <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
           ),
-          cell: ({ row }) => format(parseISO(row.getValue('date')), 'dd/MM/yyyy', { locale: fr }),
+          cell: ({ row }) => (
+            <>
+              <span className="md:hidden">{format(parseISO(row.getValue('date')), 'dd/MM/yy')}</span>
+              <span className="hidden md:inline">{format(parseISO(row.getValue('date')), 'dd/MM/yyyy', { locale: fr })}</span>
+            </>
+          ),
         },
         {
           accessorKey: 'description',
@@ -236,10 +241,35 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
     },
     initialState: {
         columnVisibility: {
-            parentCategory: filterType === 'expense'
+            parentCategory: filterType === 'expense',
+            account: false, // Hidden by default on all screens
         }
     }
   });
+
+  React.useEffect(() => {
+    const handleResize = () => {
+        if (window.innerWidth < 768) {
+            table.setColumnVisibility({
+                parentCategory: false,
+                account: false,
+                category: filterType !== 'expense'
+            });
+        } else {
+             table.setColumnVisibility({
+                parentCategory: filterType === 'expense',
+                account: true,
+                category: true,
+            });
+        }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, [table, filterType]);
+
 
   return (
     <Card className="h-full flex flex-col">
@@ -266,7 +296,7 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                    <TableCell key={cell.id} className="px-2 md:px-4">{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}
                 </TableRow>
               ))

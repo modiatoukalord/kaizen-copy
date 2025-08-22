@@ -67,7 +67,7 @@ export default function StatCards({ transactions, transfers, filterType }: StatC
         );
     }
     
-    const accountBalances = TransactionAccount.map(account => {
+    const accountBalances = TransactionAccount.reduce((acc, account) => {
         const incomeForAccount = transactions
             .filter(t => t.type === 'income' && t.account === account)
             .reduce((sum, t) => sum + t.amount, 0);
@@ -83,11 +83,9 @@ export default function StatCards({ transactions, transfers, filterType }: StatC
             .filter(t => t.fromAccount === account)
             .reduce((sum, t) => sum + t.amount, 0);
             
-        return {
-            account,
-            balance: incomeForAccount - expenseForAccount + transfersIn - transfersOut,
-        };
-    });
+        acc[account] = incomeForAccount - expenseForAccount + transfersIn - transfersOut;
+        return acc;
+    }, {} as Record<string, number>);
     
     const accountIcons = {
         'Banque': Landmark,
@@ -96,10 +94,10 @@ export default function StatCards({ transactions, transfers, filterType }: StatC
     }
 
     return (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
             <StatCard title="Solde net" value={balance} icon={DollarSign} tooltipText="Différence entre vos revenus et vos dépenses (Revenus - Dépenses)." />
-            {accountBalances.map(item => (
-                <StatCard key={item.account} title={`Solde ${item.account}`} value={item.balance} icon={accountIcons[item.account]} tooltipText={`Solde actuel pour le compte ${item.account}.`}/>
+             {Object.entries(accountBalances).map(([account, balance]) => (
+                <StatCard key={account} title={`Solde ${account}`} value={balance} icon={accountIcons[account as keyof typeof accountIcons]} tooltipText={`Solde actuel pour le compte ${account}.`}/>
             ))}
             <StatCard title="Crédits restants" value={creditRestant} icon={ArrowLeftRight} tooltipText="Montant total des crédits que vous devez encore rembourser (Crédit - Remboursement)." />
             <StatCard title="Prêts nets" value={pretNet} icon={TrendingUp} tooltipText="Montant net que d'autres vous doivent (Créances - Prêts)." />
