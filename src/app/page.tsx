@@ -1,9 +1,12 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Dashboard from '@/components/dashboard';
 import { getTransactions, getTransfers } from '@/lib/data';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Eye } from 'lucide-react';
 
 export default async function Home() {
   const initialTransactions = await getTransactions();
@@ -50,11 +53,33 @@ export default async function Home() {
         </Card>
       </div>
 
-      <Dashboard 
-        initialTransactions={initialTransactions}
-        initialTransfers={initialTransfers}
-        title="Activité Récente"
-      />
+       <Card className="bg-background/75 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle>Activité Récente</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Voir l'activité
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+                <DialogHeader>
+                  <DialogTitle>Activité Récente</DialogTitle>
+                </DialogHeader>
+                <div className="overflow-y-auto flex-1 pr-6">
+                    <Dashboard 
+                        initialTransactions={initialTransactions}
+                        initialTransfers={initialTransfers}
+                        title=""
+                    />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </CardContent>
+        </Card>
     </div>
   );
 }

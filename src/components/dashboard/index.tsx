@@ -34,7 +34,7 @@ interface DashboardProps {
   hideCharts?: boolean;
 }
 
-export default function Dashboard({ initialTransactions, initialTransfers = [], title="Tableau de bord", filterType, hideCharts = false }: DashboardProps) {
+export default function Dashboard({ initialTransactions, initialTransfers = [], title, filterType, hideCharts = false }: DashboardProps) {
   const [period, setPeriod] = useState<Period>('monthly');
   const [globalFilter, setGlobalFilter] = React.useState('');
   
@@ -96,23 +96,26 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
 
 
   return (
-    <>
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-          <div className="w-full md:w-auto">
+    <div className="space-y-4">
+        {title && (
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
+            </div>
+        )}
+        <div className="w-full">
             <div className="block md:hidden">
-              <Select value={period} onValueChange={(value) => setPeriod(value as Period)}>
+                <Select value={period} onValueChange={(value) => setPeriod(value as Period)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner une période" />
+                    <SelectValue placeholder="Sélectionner une période" />
                 </SelectTrigger>
                 <SelectContent>
-                  {periodOptions.map(option => (
+                    {periodOptions.map(option => (
                     <SelectItem key={option.value} value={option.value}>
-                      {option.label}
+                        {option.label}
                     </SelectItem>
-                  ))}
+                    ))}
                 </SelectContent>
-              </Select>
+                </Select>
             </div>
             <div className="hidden md:block">
                 <Tabs value={period} onValueChange={(value) => setPeriod(value as Period)} className="hidden md:block">
@@ -123,7 +126,6 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
                 </TabsList>
                 </Tabs>
             </div>
-          </div>
         </div>
         
         <StatCards transactions={filteredData.transactions} transfers={filteredData.transfers} filterType={filterType} />
@@ -165,6 +167,6 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
             </div>
         )}
        
-    </>
+    </div>
   );
 }
