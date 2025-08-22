@@ -42,44 +42,46 @@ export default async function Home() {
             <DashboardActionItem href="/charts" imgSrc="/images/icons/graph.png" label="Graphiques" />
           </CardContent>
         </Card>
-
-        <Card className="bg-purple-50/50 dark:bg-purple-900/20 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Planification & Budget</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
-             <DashboardActionItem href="/planning" imgSrc="/images/icons/planning.png" label="Planning" />
-          </CardContent>
-        </Card>
       </div>
 
-       <Card className="bg-background/75 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Activité Récente</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button>
-                    <Eye className="mr-2 h-4 w-4" />
-                    Voir l'activité
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
-                <DialogHeader>
-                  <DialogTitle>Activité Récente</DialogTitle>
-                </DialogHeader>
-                <div className="overflow-y-auto flex-1 pr-6">
-                    <Dashboard 
-                        initialTransactions={initialTransactions}
-                        initialTransfers={initialTransfers}
-                        title=""
-                    />
-                </div>
-              </DialogContent>
-            </Dialog>
-          </CardContent>
-        </Card>
+      <div className="grid gap-6 md:grid-cols-2">
+            <Card className="bg-purple-50/50 dark:bg-purple-900/20 backdrop-blur-sm">
+                <CardHeader>
+                    <CardTitle>Planification & Budget</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4">
+                    <DashboardActionItem href="/planning" imgSrc="/images/icons/planning.png" label="Planning" />
+                </CardContent>
+            </Card>
+
+            <Card className="bg-background/75 backdrop-blur-sm">
+                <CardHeader>
+                    <CardTitle>Activité Récente</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Dialog>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Voir l'activité
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+                        <DialogHeader>
+                        <DialogTitle>Activité Récente</DialogTitle>
+                        </DialogHeader>
+                        <div className="overflow-y-auto flex-1 pr-6">
+                            <Dashboard 
+                                initialTransactions={initialTransactions}
+                                initialTransfers={initialTransfers}
+                                title=""
+                            />
+                        </div>
+                    </DialogContent>
+                    </Dialog>
+                </CardContent>
+            </Card>
+       </div>
     </div>
   );
 }
