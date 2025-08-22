@@ -34,19 +34,10 @@ interface DashboardProps {
   hideCharts?: boolean;
 }
 
-export default function Dashboard({ initialTransactions: serverTransactions, initialTransfers: serverTransfers = [], title="Tableau de bord", filterType, hideCharts = false }: DashboardProps) {
+export default function Dashboard({ initialTransactions, initialTransfers = [], title="Tableau de bord", filterType, hideCharts = false }: DashboardProps) {
   const [period, setPeriod] = useState<Period>('monthly');
   const [globalFilter, setGlobalFilter] = React.useState('');
-  const [transactions, setTransactions] = useState(serverTransactions);
-  const [transfers, setTransfers] = useState(serverTransfers);
-
-  useEffect(() => {
-    // This allows the component to reflect updates from server actions (e.g. adding a transaction)
-    setTransactions(serverTransactions);
-    setTransfers(serverTransfers);
-  }, [serverTransactions, serverTransfers])
-
-
+  
   const periodOptions: { label: string, value: Period }[] = [
     { label: 'Semaine', value: 'weekly' },
     { label: 'Mois', value: 'monthly' },
@@ -73,23 +64,23 @@ export default function Dashboard({ initialTransactions: serverTransactions, ini
         break;
     }
 
-    let periodTransactions = transactions.filter(t => isWithinInterval(parseISO(t.date), interval));
-    const periodTransfers = transfers.filter(t => isWithinInterval(parseISO(t.date), interval));
+    let periodTransactions = initialTransactions.filter(t => isWithinInterval(parseISO(t.date), interval));
+    const periodTransfers = initialTransfers.filter(t => isWithinInterval(parseISO(t.date), interval));
 
     if (filterType) {
         periodTransactions = periodTransactions.filter(t => t.type === filterType);
     }
     
     return { transactions: periodTransactions, transfers: periodTransfers };
-  }, [period, transactions, transfers, filterType]);
+  }, [period, initialTransactions, initialTransfers, filterType]);
   
   const allTransactionsForType = useMemo(() => {
-     let filtered = transactions;
+     let filtered = initialTransactions;
      if (filterType) {
         filtered = filtered.filter(t => t.type === filterType);
     }
     return filtered;
-  }, [transactions, filterType]);
+  }, [initialTransactions, filterType]);
 
   const categoryOptions = React.useMemo(() => {
     let categories: readonly string[];
