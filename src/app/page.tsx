@@ -89,7 +89,7 @@ export default async function Home() {
 function DashboardActionItem({ href, imgSrc, label }: { href: string, imgSrc: string, label: string }) {
   return (
     <Link href={href}>
-      <Button variant="outline" className="h-28 w-full flex-col gap-2 bg-background/75 hover:bg-background/90 backdrop-blur-sm">
+      <Button variant="outline" className="h-28 w-full flex-col gap-2 bg-background/75 hover:bg-accent/20 backdrop-blur-sm">
         <Image src={imgSrc} alt={label} width={48} height={48} className="h-12 w-12" />
         <span>{label}</span>
       </Button>
