@@ -16,7 +16,7 @@ export default function Home() {
         </div>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="lg:col-span-2 bg-blue-50 dark:bg-blue-900/20">
+        <Card className="lg:col-span-2 bg-blue-50/50 dark:bg-blue-900/20 backdrop-blur-sm">
           <CardHeader>
             <CardTitle>Transactions</CardTitle>
           </CardHeader>
@@ -27,7 +27,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card className="bg-green-50 dark:bg-green-900/20">
+        <Card className="bg-green-50/50 dark:bg-green-900/20 backdrop-blur-sm">
           <CardHeader>
             <CardTitle>Synthèse & Rapports</CardTitle>
           </CardHeader>
@@ -36,7 +36,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card className="bg-purple-50 dark:bg-purple-900/20">
+        <Card className="bg-purple-50/50 dark:bg-purple-900/20 backdrop-blur-sm">
           <CardHeader>
             <CardTitle>Planification & Budget</CardTitle>
           </CardHeader>
@@ -45,7 +45,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card className="bg-yellow-50 dark:bg-yellow-900/20">
+        <Card className="bg-yellow-50/50 dark:bg-yellow-900/20 backdrop-blur-sm">
           <CardHeader>
             <CardTitle>Configuration</CardTitle>
           </CardHeader>
@@ -61,7 +61,7 @@ export default function Home() {
 function DashboardActionItem({ href, icon: Icon, label }: { href: string, icon: React.ElementType, label: string }) {
   return (
     <Link href={href}>
-      <Button variant="outline" className="h-28 w-full flex-col gap-2 bg-background/50 hover:bg-background">
+      <Button variant="outline" className="h-28 w-full flex-col gap-2 bg-background/50 hover:bg-background/75 backdrop-blur-sm">
         <Icon className="h-8 w-8 text-primary" />
         <span>{label}</span>
       </Button>
