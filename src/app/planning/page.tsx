@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useTransition, useActionState } from 'react';
@@ -199,7 +200,7 @@ export default function PlanningPage() {
                     </div>
                      <div className="flex gap-2 w-full md:w-auto">
                         <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                            <SelectTrigger className="w-full md:w-[180px]">
+                            <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Sélectionner un mois" />
                             </SelectTrigger>
                             <SelectContent>
@@ -211,7 +212,7 @@ export default function PlanningPage() {
                             </SelectContent>
                         </Select>
                         <Select value={String(selectedYear)} onValueChange={(value) => setSelectedYear(Number(value))}>
-                             <SelectTrigger className="w-full md:w-[120px]">
+                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Sélectionner une année" />
                             </SelectTrigger>
                             <SelectContent>

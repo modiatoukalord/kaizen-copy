@@ -17,6 +17,7 @@ import {
 } from 'date-fns';
 import type { Transaction, Period, Category, Transfer } from '@/lib/types';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import StatCards from './stat-cards';
 import TransactionsTable from './transactions-table';
 import { IncomeCategory, AllExpenseSubCategories } from '@/lib/types';
@@ -35,6 +36,12 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
   const [period, setPeriod] = useState<Period>('monthly');
   const [globalFilter, setGlobalFilter] = React.useState('');
 
+  const periodOptions: { label: string, value: Period }[] = [
+    { label: 'Semaine', value: 'weekly' },
+    { label: 'Mois', value: 'monthly' },
+    { label: 'Trimestre', value: 'quarterly' },
+    { label: 'Année', value: 'annually' },
+  ];
 
   const filteredData = useMemo(() => {
     const now = new Date();
@@ -90,14 +97,29 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
     <>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{title}</h1>
-          <Tabs value={period} onValueChange={(value) => setPeriod(value as Period)} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
-              <TabsTrigger value="weekly">Semaine</TabsTrigger>
-              <TabsTrigger value="monthly">Mois</TabsTrigger>
-              <TabsTrigger value="quarterly">Trimestre</TabsTrigger>
-              <TabsTrigger value="annually">Année</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="w-full md:w-auto">
+            <div className="block md:hidden">
+              <Select value={period} onValueChange={(value) => setPeriod(value as Period)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une période" />
+                </SelectTrigger>
+                <SelectContent>
+                  {periodOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Tabs value={period} onValueChange={(value) => setPeriod(value as Period)} className="hidden md:block">
+              <TabsList>
+                {periodOptions.map(option => (
+                  <TabsTrigger key={option.value} value={option.value}>{option.label}</TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
         
         <StatCards transactions={filteredData.transactions} transfers={filteredData.transfers} filterType={filterType} />
@@ -108,8 +130,8 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
             </div>
         )}
         
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <div className="col-span-4 lg:col-span-7">
+        <div className="grid gap-4">
+            <div className="col-span-1">
                 <TransactionsTable 
                     transactions={allTransactionsForType} 
                     filterType={filterType}

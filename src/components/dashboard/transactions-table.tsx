@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -136,8 +137,8 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
     } else {
          baseColumns.push({
             accessorKey: 'category',
-            header: 'Catégorie',
-            cell: ({ row }) => <CategoryBadge category={row.original.category} />,
+            header: () => <div className="hidden md:table-cell">Catégorie</div>,
+            cell: ({ row }) => <div className="hidden md:table-cell"><CategoryBadge category={row.original.category} /></div>,
             filterFn: (row, id, value) => {
                 return value.includes(row.getValue(id));
             },
@@ -239,21 +240,7 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
       sorting,
       columnFilters,
       globalFilter,
-      columnVisibility: {
-        account: false,
-        parentCategory: filterType === 'expense'
-      }
     },
-    initialState: {
-        columnVisibility: {
-            parentCategory: filterType === 'expense',
-        }
-    },
-    onColumnVisibilityChange: (updater) => {
-      if (typeof updater === 'function') {
-        // no-op to avoid state change
-      }
-    }
   });
 
 
