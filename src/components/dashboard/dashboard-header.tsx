@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import { useCurrency } from '@/contexts/currency-context';
 import { useState } from 'react';
+import InstallPWA from './install-pwa';
 
 export default function DashboardHeader() {
   const pathname = usePathname();
@@ -43,6 +44,7 @@ export default function DashboardHeader() {
       </div>
 
         <div className="flex flex-1 items-center justify-end gap-2">
+            <InstallPWA />
             <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger className="w-[100px]">
                     <SelectValue placeholder="Devise" />
