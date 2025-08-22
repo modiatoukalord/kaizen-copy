@@ -79,8 +79,7 @@ export default function TransfersDashboard({ initialTransfers }: TransfersDashbo
       ),
       cell: ({ row }) => (
         <>
-            <span className="md:hidden">{format(parseISO(row.getValue('date')), 'dd/MM/yy')}</span>
-            <span className="hidden md:inline">{format(new Date(row.getValue('date')), 'dd/MM/yyyy')}</span>
+            {format(new Date(row.getValue('date')), 'dd/MM/yyyy')}
         </>
       ),
     },
@@ -165,7 +164,8 @@ export default function TransfersDashboard({ initialTransfers }: TransfersDashbo
             )
         }
     }
-  ], [currency, isPending, onDelete]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [currency, isPending]);
 
   const table = useReactTable({
     data: transfers,
@@ -180,28 +180,7 @@ export default function TransfersDashboard({ initialTransfers }: TransfersDashbo
       sorting,
       columnFilters,
     },
-    initialState: {
-        columnVisibility: {
-            description: false,
-        }
-    }
   });
-
-  React.useEffect(() => {
-    const handleResize = () => {
-        if (window.innerWidth >= 768) {
-            table.setColumnVisibility({ description: true });
-        } else {
-            table.setColumnVisibility({ description: false });
-        }
-    };
-    
-    window.addEventListener('resize', handleResize);
-    handleResize(); // Initial check
-
-    return () => window.removeEventListener('resize', handleResize);
-  }, [table]);
-
 
   return (
     <div className="flex flex-col gap-8">
@@ -221,7 +200,7 @@ export default function TransfersDashboard({ initialTransfers }: TransfersDashbo
                   {table.getHeaderGroups().map((headerGroup) => (
                     <TableRow key={headerGroup.id}>
                       {headerGroup.headers.map((header) => (
-                        <TableHead key={header.id} className="px-2 md:px-4">
+                        <TableHead key={header.id}>
                           {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                         </TableHead>
                       ))}
@@ -233,7 +212,7 @@ export default function TransfersDashboard({ initialTransfers }: TransfersDashbo
                     table.getRowModel().rows.map((row) => (
                       <TableRow key={row.id}>
                         {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id} className="px-2 md:px-4">{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                          <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                         ))}
                       </TableRow>
                     ))

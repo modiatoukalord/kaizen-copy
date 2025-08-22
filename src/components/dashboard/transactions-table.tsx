@@ -95,8 +95,7 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
           ),
           cell: ({ row }) => (
             <>
-              <span className="md:hidden">{format(parseISO(row.getValue('date')), 'dd/MM/yy')}</span>
-              <span className="hidden md:inline">{format(parseISO(row.getValue('date')), 'dd/MM/yyyy', { locale: fr })}</span>
+              {format(parseISO(row.getValue('date')), 'dd/MM/yyyy', { locale: fr })}
             </>
           ),
         },
@@ -220,7 +219,8 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
 
     return baseColumns;
 
-  }, [filterType, currency, isPending, onDelete]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterType, currency, isPending]);
 
   const table = useReactTable({
     data: transactions,
@@ -242,33 +242,9 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
     initialState: {
         columnVisibility: {
             parentCategory: filterType === 'expense',
-            account: false, // Hidden by default on all screens
         }
     }
   });
-
-  React.useEffect(() => {
-    const handleResize = () => {
-        if (window.innerWidth < 768) {
-            table.setColumnVisibility({
-                parentCategory: false,
-                account: false,
-                category: filterType !== 'expense'
-            });
-        } else {
-             table.setColumnVisibility({
-                parentCategory: filterType === 'expense',
-                account: true,
-                category: true,
-            });
-        }
-    };
-    
-    window.addEventListener('resize', handleResize);
-    handleResize(); // Initial check
-
-    return () => window.removeEventListener('resize', handleResize);
-  }, [table, filterType]);
 
 
   return (
@@ -297,7 +273,7 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
                   table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="px-2 md:px-4">{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                       ))}
                     </TableRow>
                   ))
