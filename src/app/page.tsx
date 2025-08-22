@@ -2,8 +2,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import Dashboard from '@/components/dashboard';
+import { getTransactions, getTransfers } from '@/lib/data';
 
-export default function Home() {
+export default async function Home() {
+  const initialTransactions = await getTransactions();
+  const initialTransfers = await getTransfers();
+
   return (
     <div className="flex-1 space-y-8 p-4 md:p-8">
       <div className="flex items-center justify-between space-y-2">
@@ -44,6 +49,12 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
+
+      <Dashboard 
+        initialTransactions={initialTransactions}
+        initialTransfers={initialTransfers}
+        title="Activité Récente"
+      />
     </div>
   );
 }

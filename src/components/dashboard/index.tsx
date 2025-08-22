@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   isWithinInterval,
   startOfWeek,
@@ -23,6 +23,7 @@ import TransactionsTable from './transactions-table';
 import { IncomeCategory, AllExpenseSubCategories } from '@/lib/types';
 import SummaryChart from './summary-chart';
 import { Card, CardContent } from '../ui/card';
+import { getTransactions, getTransfers } from '@/lib/data';
 
 
 interface DashboardProps {
@@ -33,9 +34,18 @@ interface DashboardProps {
   hideCharts?: boolean;
 }
 
-export default function Dashboard({ initialTransactions, initialTransfers = [], title="Tableau de bord", filterType, hideCharts = false }: DashboardProps) {
+export default function Dashboard({ initialTransactions: serverTransactions, initialTransfers: serverTransfers = [], title="Tableau de bord", filterType, hideCharts = false }: DashboardProps) {
   const [period, setPeriod] = useState<Period>('monthly');
   const [globalFilter, setGlobalFilter] = React.useState('');
+  const [transactions, setTransactions] = useState(serverTransactions);
+  const [transfers, setTransfers] = useState(serverTransfers);
+
+  useEffect(() => {
+    // This allows the component to reflect updates from server actions (e.g. adding a transaction)
+    setTransactions(serverTransactions);
+    setTransfers(serverTransfers);
+  }, [serverTransactions, serverTransfers])
+
 
   const periodOptions: { label: string, value: Period }[] = [
     { label: 'Semaine', value: 'weekly' },
@@ -63,23 +73,23 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
         break;
     }
 
-    let periodTransactions = initialTransactions.filter(t => isWithinInterval(parseISO(t.date), interval));
-    const periodTransfers = initialTransfers.filter(t => isWithinInterval(parseISO(t.date), interval));
+    let periodTransactions = transactions.filter(t => isWithinInterval(parseISO(t.date), interval));
+    const periodTransfers = transfers.filter(t => isWithinInterval(parseISO(t.date), interval));
 
     if (filterType) {
         periodTransactions = periodTransactions.filter(t => t.type === filterType);
     }
     
     return { transactions: periodTransactions, transfers: periodTransfers };
-  }, [period, initialTransactions, initialTransfers, filterType]);
+  }, [period, transactions, transfers, filterType]);
   
   const allTransactionsForType = useMemo(() => {
-     let transactions = initialTransactions;
+     let filtered = transactions;
      if (filterType) {
-        transactions = transactions.filter(t => t.type === filterType);
+        filtered = filtered.filter(t => t.type === filterType);
     }
-    return transactions;
-  }, [initialTransactions, filterType]);
+    return filtered;
+  }, [transactions, filterType]);
 
   const categoryOptions = React.useMemo(() => {
     let categories: readonly string[];
@@ -97,7 +107,7 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
   return (
     <>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{title}</h1>
+          <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
           <div className="w-full md:w-auto">
             <div className="block md:hidden">
               <Select value={period} onValueChange={(value) => setPeriod(value as Period)}>
