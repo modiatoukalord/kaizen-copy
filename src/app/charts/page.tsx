@@ -11,6 +11,7 @@ import { subMonths, format, startOfMonth, endOfMonth, isWithinInterval, getYear 
 import { fr } from 'date-fns/locale';
 import type { Transaction } from '@/lib/types';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import SubNavigation from '@/components/dashboard/sub-navigation';
 
 function ChartsContent() {
   const router = useRouter();
@@ -52,54 +53,57 @@ function ChartsContent() {
   }, [selectedYear, selectedMonth, transactions]);
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Graphiques</h1>
-              <p className="text-muted-foreground">Visualisez vos données financières.</p>
-            </div>
-            <div className="flex gap-2 w-full md:w-auto">
-                <div className="w-full md:w-auto">
-                    <Select value={String(selectedYear)} onValueChange={(value) => setSelectedYear(Number(value))}>
-                        <SelectTrigger className="w-full md:w-[120px]">
-                        <SelectValue placeholder="Année" />
-                        </SelectTrigger>
-                        <SelectContent>
-                        {years.map(year => (
-                            <SelectItem key={year} value={String(year)}>
-                            {year}
-                            </SelectItem>
-                        ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="w-full md:w-auto">
-                    <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                        <SelectTrigger className="w-full md:w-[180px]">
-                        <SelectValue placeholder="Mois" />
-                        </SelectTrigger>
-                        <SelectContent>
-                        {months.map(month => (
-                            <SelectItem key={month.value} value={month.value}>
-                            {month.label}
-                            </SelectItem>
-                        ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="overflow-x-auto">
-          <div className="min-w-[600px]">
-            <IncomeExpenseChart transactions={filteredTransactions} />
+    <div className="flex-1 space-y-8 p-4 md:p-8">
+      <SubNavigation />
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Graphiques</h1>
+                <p className="text-muted-foreground">Visualisez vos données financières.</p>
+              </div>
+              <div className="flex gap-2 w-full md:w-auto">
+                  <div className="w-full md:w-auto">
+                      <Select value={String(selectedYear)} onValueChange={(value) => setSelectedYear(Number(value))}>
+                          <SelectTrigger className="w-full md:w-[120px]">
+                          <SelectValue placeholder="Année" />
+                          </SelectTrigger>
+                          <SelectContent>
+                          {years.map(year => (
+                              <SelectItem key={year} value={String(year)}>
+                              {year}
+                              </SelectItem>
+                          ))}
+                          </SelectContent>
+                      </Select>
+                  </div>
+                  <div className="w-full md:w-auto">
+                      <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                          <SelectTrigger className="w-full md:w-[180px]">
+                          <SelectValue placeholder="Mois" />
+                          </SelectTrigger>
+                          <SelectContent>
+                          {months.map(month => (
+                              <SelectItem key={month.value} value={month.value}>
+                              {month.label}
+                              </SelectItem>
+                          ))}
+                          </SelectContent>
+                      </Select>
+                  </div>
+              </div>
           </div>
         </div>
-        <div className="overflow-x-auto">
-          <div className="min-w-[600px]">
-            <ParetoChart transactions={filteredTransactions} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="overflow-x-auto">
+            <div className="min-w-[600px]">
+              <IncomeExpenseChart transactions={filteredTransactions} />
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <div className="min-w-[600px]">
+              <ParetoChart transactions={filteredTransactions} />
+            </div>
           </div>
         </div>
       </div>
