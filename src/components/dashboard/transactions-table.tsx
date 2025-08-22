@@ -251,7 +251,7 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
         <CardDescription>Une liste de vos activités financières.</CardDescription>
         
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-auto max-h-[500px]">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
