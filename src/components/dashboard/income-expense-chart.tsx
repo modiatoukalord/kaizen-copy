@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -28,7 +29,7 @@ export default function IncomeExpenseChart({ transactions }: IncomeExpenseChartP
         <CardDescription>Une comparaison de vos revenus et dépenses totaux.</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={{}} className="h-[400px] w-full">
+        <ChartContainer config={{}} className="h-[300px] w-full">
           <BarChart data={chartData} accessibilityLayer>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />

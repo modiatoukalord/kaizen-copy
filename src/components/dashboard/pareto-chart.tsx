@@ -50,7 +50,7 @@ export default function ParetoChart({ transactions }: ParetoChartProps) {
                 <CardTitle>Diagramme de Pareto des Dépenses</CardTitle>
                 <CardDescription>Analyse des catégories de dépenses les plus importantes.</CardDescription>
             </CardHeader>
-            <CardContent className="flex h-[400px] items-center justify-center">
+            <CardContent className="flex h-[300px] items-center justify-center">
                 <p className="text-muted-foreground">Aucune donnée de dépense à analyser.</p>
             </CardContent>
         </Card>
@@ -64,7 +64,7 @@ export default function ParetoChart({ transactions }: ParetoChartProps) {
         <CardDescription>Analyse des 5 catégories de dépenses les plus importantes.</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={{}} className="h-[400px] w-full">
+        <ChartContainer config={{}} className="h-[300px] w-full">
           <ComposedChart data={chartData} accessibilityLayer>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="category" tickLine={false} axisLine={false} tickMargin={8} />
