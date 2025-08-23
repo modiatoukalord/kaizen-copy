@@ -1,79 +1,150 @@
 
-import Link from 'next/link';
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { getTransactions, getTransfers } from '@/lib/data';
-import RecentActivityDialog from '@/components/dashboard/recent-activity-dialog';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from '@/components/ui/carousel';
+import { PiggyBank } from 'lucide-react';
 
+const ONBOARDING_KEY = 'onboarding-complete';
 
-export default async function Home() {
-  const initialTransactions = await getTransactions();
-  const initialTransfers = await getTransfers();
+export default function WelcomePage() {
+  const router = useRouter();
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+    const onboardingComplete = localStorage.getItem(ONBOARDING_KEY);
+    if (onboardingComplete === 'true') {
+      router.replace('/dashboard');
+    }
+  }, [router]);
+
+  const [api, setApi] = React.useState<CarouselApi>();
+  const [current, setCurrent] = React.useState(0);
+  const [count, setCount] = React.useState(0);
+
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap());
+
+    api.on('select', () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
+
+  const handleNext = () => {
+    if (current === count - 1) {
+      handleGetStarted();
+    } else {
+      api?.scrollNext();
+    }
+  };
+
+  const handleGetStarted = () => {
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+    router.push('/dashboard');
+  };
+
+  if (!hasMounted) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <PiggyBank className="h-12 w-12 animate-pulse text-primary" />
+      </div>
+    );
+  }
+
+  const onboardingComplete = localStorage.getItem(ONBOARDING_KEY);
+  if (onboardingComplete === 'true') {
+    return null; // or a loading spinner while redirecting
+  }
 
   return (
-    <div className="flex-1 space-y-8 p-4 md:p-8">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Tableau de bord</h2>
-          <p className="text-muted-foreground">
-            Votre centre de contrôle financier.
-          </p>
+    <div className="flex h-screen w-full flex-col items-center justify-center bg-background p-4 md:p-8">
+      <div className="w-full max-w-md md:max-w-lg">
+        <Carousel setApi={setApi} className="w-full">
+          <CarouselContent>
+            <CarouselItem>
+              <OnboardingStep
+                image="/images/onboarding-1.png"
+                data-ai-hint="finance management"
+                title="Bienvenue chez Le KAIZEN"
+                description="Prenez le contrôle total de vos finances. Suivez vos revenus, vos dépenses et atteignez vos objectifs financiers."
+              />
+            </CarouselItem>
+            <CarouselItem>
+              <OnboardingStep
+                image="/images/onboarding-2.png"
+                data-ai-hint="budget planning"
+                title="Planifiez Votre Avenir"
+                description="Créez des budgets mensuels, suivez vos dépenses par catégorie et recevez des alertes pour rester sur la bonne voie."
+              />
+            </CarouselItem>
+            <CarouselItem>
+              <OnboardingStep
+                image="/images/onboarding-3.png"
+                data-ai-hint="financial analytics"
+                title="Visualisez Vos Données"
+                description="Des graphiques et des rapports perspicaces pour vous aider à comprendre vos habitudes financières et à prendre de meilleures décisions."
+              />
+            </CarouselItem>
+          </CarouselContent>
+        </Carousel>
+
+        <div className="mt-8 flex items-center justify-between">
+          <Button variant="ghost" onClick={handleGetStarted}>
+            Passer
+          </Button>
+
+          <div className="flex items-center gap-2">
+            {Array.from({ length: count }).map((_, i) => (
+              <div
+                key={i}
+                className={`h-2 w-2 rounded-full ${
+                  i === current ? 'bg-primary' : 'bg-muted'
+                }`}
+              />
+            ))}
+          </div>
+
+          <Button onClick={handleNext}>
+            {current === count - 1 ? 'Commencer' : 'Suivant'}
+          </Button>
         </div>
-      </div>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="order-1 bg-background/75 backdrop-blur-sm md:order-3 lg:order-4">
-            <CardHeader>
-                <CardTitle>Activité Récente</CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-6 pt-0">
-                <RecentActivityDialog
-                    initialTransactions={initialTransactions}
-                    initialTransfers={initialTransfers}
-                />
-            </CardContent>
-        </Card>
-
-        <Card className="order-2 lg:col-span-2 bg-blue-50/50 dark:bg-blue-900/20 backdrop-blur-sm md:order-1 lg:order-1">
-          <CardHeader>
-            <CardTitle>Transactions</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <DashboardActionItem href="/income" imgSrc="/images/icons/revenue.png" label="Revenus" />
-            <DashboardActionItem href="/expenses" imgSrc="/images/icons/depense.png" label="Dépenses" />
-            <DashboardActionItem href="/transfers" imgSrc="/images/icons/virement.png" label="Virements" />
-          </CardContent>
-        </Card>
-        
-        <Card className="order-3 md:order-2 bg-green-50/50 dark:bg-green-900/20 backdrop-blur-sm lg:order-2">
-          <CardHeader>
-            <CardTitle>Synthèse & Rapports</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
-            <DashboardActionItem href="/charts" imgSrc="/images/icons/graph.png" label="Graphiques" />
-          </CardContent>
-        </Card>
-
-        <Card className="order-4 md:order-4 bg-purple-50/50 dark:bg-purple-900/20 backdrop-blur-sm lg:order-3">
-            <CardHeader>
-                <CardTitle>Planification & Budget</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-                <DashboardActionItem href="/planning" imgSrc="/images/icons/planning.png" label="Planning" />
-            </CardContent>
-        </Card>
       </div>
     </div>
   );
 }
 
-function DashboardActionItem({ href, imgSrc, label }: { href: string, imgSrc: string, label: string }) {
+function OnboardingStep({ image, title, description, 'data-ai-hint': dataAiHint }: { image: string, title: string, description: string, 'data-ai-hint': string }) {
   return (
-    <Link href={href}>
-      <Button variant="outline" className="h-28 w-full flex-col gap-2 bg-background/75 hover:bg-accent/20 backdrop-blur-sm">
-        <Image src={imgSrc} alt={label} width={48} height={48} className="h-12 w-12" />
-        <span>{label}</span>
-      </Button>
-    </Link>
+    <Card className="border-none bg-transparent shadow-none">
+      <CardContent className="flex flex-col items-center justify-center p-0 text-center">
+        <Image
+          src={image}
+          width={400}
+          height={400}
+          alt={title}
+          className="mb-8 aspect-square w-full max-w-xs rounded-lg object-cover"
+          data-ai-hint={dataAiHint}
+        />
+        <h2 className="text-2xl font-bold">{title}</h2>
+        <p className="mt-2 text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
   );
 }

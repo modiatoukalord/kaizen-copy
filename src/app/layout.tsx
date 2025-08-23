@@ -1,5 +1,8 @@
 
+'use client';
+
 import type { Metadata } from 'next';
+import { usePathname } from 'next/navigation';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import DashboardHeader from '@/components/dashboard/dashboard-header';
@@ -7,7 +10,7 @@ import { CurrencyProvider } from '@/contexts/currency-context';
 import MobileNav from '@/components/dashboard/mobile-nav';
 import ChatAssistant from '@/components/assistant/chat-assistant';
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: 'Le KAIZEN',
   description: 'A personal finance dashboard to track income and expenses.',
   manifest: '/manifest.webmanifest',
@@ -19,6 +22,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const isDashboardRoute = !pathname.startsWith('/welcome') && pathname !== '/';
+
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
@@ -33,13 +39,17 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <CurrencyProvider>
           <div className="flex min-h-screen w-full flex-col">
-              <DashboardHeader />
-              <main className="flex-1 pb-24 md:pb-8">
+              {isDashboardRoute && <DashboardHeader />}
+              <main className={isDashboardRoute ? "flex-1 pb-24 md:pb-8" : "flex-1"}>
                   {children}
               </main>
           </div>
-          <ChatAssistant />
-          <MobileNav />
+          {isDashboardRoute && (
+            <>
+              <ChatAssistant />
+              <MobileNav />
+            </>
+          )}
           <Toaster />
         </CurrencyProvider>
       </body>

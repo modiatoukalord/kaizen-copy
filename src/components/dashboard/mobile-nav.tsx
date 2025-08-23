@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, BarChart2, CalendarDays, ArrowRightLeft, Plus, Wallet, TrendingUp, TrendingDown, Repeat } from 'lucide-react';
+import { LayoutDashboard, BarChart2, CalendarDays, ArrowRightLeft, Plus, Wallet, TrendingUp, TrendingDown, Repeat, Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AddTransactionSheet } from './add-transaction-sheet';
 import { Button } from '../ui/button';
@@ -14,8 +14,12 @@ export default function MobileNav() {
     const pathname = usePathname();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
 
+    if (pathname === '/') {
+        return null;
+    }
+
     const mainNavItems = [
-        { href: '/', label: 'Board', icon: LayoutDashboard },
+        { href: '/dashboard', label: 'Board', icon: LayoutDashboard },
         { href: '/charts', label: 'Graphiques', icon: BarChart2 },
     ];
     
@@ -33,7 +37,7 @@ export default function MobileNav() {
         <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur-sm md:hidden">
             <div className="relative grid h-16 grid-cols-5 items-center">
                 {mainNavItems.map((item) => {
-                    const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+                    const isActive = item.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(item.href);
                     return (
                         <Link key={item.href} href={item.href} className="flex flex-col items-center justify-center gap-1 text-xs font-medium text-muted-foreground">
                             <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />

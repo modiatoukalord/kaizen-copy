@@ -41,7 +41,7 @@ export default function SubNavigation() {
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <Button variant="outline" asChild className="hidden sm:inline-flex">
-        <Link href="/">
+        <Link href="/dashboard">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Tableau de bord
         </Link>
