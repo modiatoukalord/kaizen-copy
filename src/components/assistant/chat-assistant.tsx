@@ -32,10 +32,7 @@ function ChatContent({ onSendMessage, messages, input, setInput, isPending }: { 
     }, [messages]);
 
     return (
-        <div className="flex flex-col h-full">
-          <header className="bg-primary text-primary-foreground p-4 rounded-t-lg">
-            <h3 className="font-bold text-lg">Assistant Virtuel</h3>
-          </header>
+        <>
           <ScrollArea className="flex-1 bg-background" ref={scrollAreaRef}>
             <div className="p-4 space-y-4">
               {messages.map((message) => (
@@ -77,7 +74,7 @@ function ChatContent({ onSendMessage, messages, input, setInput, isPending }: { 
               )}
             </div>
           </ScrollArea>
-          <footer className="border-t bg-background p-2 rounded-b-lg">
+          <footer className="border-t bg-background p-2">
             <form onSubmit={onSendMessage} className="flex items-center gap-2">
               <Input
                 value={input}
@@ -91,9 +88,21 @@ function ChatContent({ onSendMessage, messages, input, setInput, isPending }: { 
               </Button>
             </form>
           </footer>
+        </>
+    )
+}
+
+function DesktopChatContent({ onSendMessage, messages, input, setInput, isPending }: { onSendMessage: (e: React.FormEvent) => void, messages: Message[], input: string, setInput: (s:string)=>void, isPending: boolean}) {
+    return (
+        <div className="flex flex-col h-full">
+            <header className="bg-primary text-primary-foreground p-4 rounded-t-lg">
+                <h3 className="font-bold text-lg">Assistant Virtuel</h3>
+            </header>
+            <ChatContent onSendMessage={onSendMessage} messages={messages} input={input} setInput={setInput} isPending={isPending} />
         </div>
     )
 }
+
 
 export default function ChatAssistant({ children }: { children?: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -158,7 +167,10 @@ export default function ChatAssistant({ children }: { children?: React.ReactNode
               <SheetTrigger asChild>
                   {children || <Button>Open Chat</Button>}
               </SheetTrigger>
-              <SheetContent side="bottom" className="h-full p-0 border-none">
+              <SheetContent side="bottom" className="h-full flex flex-col p-0 border-none">
+                  <SheetHeader className="bg-primary text-primary-foreground p-4 text-left">
+                    <SheetTitle>Assistant Virtuel</SheetTitle>
+                  </SheetHeader>
                   <ChatContent {...chatContentProps} />
               </SheetContent>
           </Sheet>
@@ -185,7 +197,7 @@ export default function ChatAssistant({ children }: { children?: React.ReactNode
         className="w-80 md:w-96 rounded-lg shadow-xl border-none p-0 h-[60vh]"
         sideOffset={20}
       >
-        <ChatContent {...chatContentProps} />
+        <DesktopChatContent {...chatContentProps} />
       </PopoverContent>
     </Popover>
   );
