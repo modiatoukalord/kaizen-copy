@@ -15,6 +15,7 @@ type AuthContextType = {
   login: (username: string, pin: string) => void;
   logout: () => void;
   changePin: (username: string, oldPin: string, newPin: string) => void;
+  changeUsername: (newUsername: string, pin: string) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -87,6 +88,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error("L'ancien code PIN est incorrect.");
     }
   }, []);
+  
+  const changeUsername = useCallback((newUsername: string, pin: string) => {
+    const storedUserJSON = localStorage.getItem('finance-app-user');
+    if (!storedUserJSON) {
+      throw new Error("Aucun utilisateur trouvé. Impossible de changer le nom d'utilisateur.");
+    }
+
+    const storedUser = JSON.parse(storedUserJSON);
+    if (mockHash(pin) !== storedUser.pinHash) {
+      throw new Error("Le code PIN est incorrect.");
+    }
+
+    // Update localStorage
+    const updatedUser = { ...storedUser, username: newUsername };
+    localStorage.setItem('finance-app-user', JSON.stringify(updatedUser));
+
+    // Update sessionStorage
+    const currentUser = { username: newUsername };
+    sessionStorage.setItem('finance-app-session', JSON.stringify(currentUser));
+    
+    // Update state
+    setUser(currentUser);
+  }, []);
 
   const value = useMemo(() => ({
     user,
@@ -94,8 +118,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthLoading,
     login,
     logout,
-    changePin
-  }), [user, isAuthLoading, login, logout, changePin]);
+    changePin,
+    changeUsername,
+  }), [user, isAuthLoading, login, logout, changePin, changeUsername]);
 
   return (
     <AuthContext.Provider value={value}>
