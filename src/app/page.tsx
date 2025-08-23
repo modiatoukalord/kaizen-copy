@@ -21,8 +21,20 @@ export default async function Home() {
           </p>
         </div>
       </div>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="lg:col-span-2 bg-blue-50/50 dark:bg-blue-900/20 backdrop-blur-sm">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="order-2 bg-background/75 backdrop-blur-sm md:order-3 lg:order-4">
+            <CardHeader>
+                <CardTitle>Activité Récente</CardTitle>
+            </CardHeader>
+            <CardContent className="flex items-center justify-center">
+                <RecentActivityDialog
+                    initialTransactions={initialTransactions}
+                    initialTransfers={initialTransfers}
+                />
+            </CardContent>
+        </Card>
+
+        <Card className="order-1 lg:col-span-2 bg-blue-50/50 dark:bg-blue-900/20 backdrop-blur-sm md:order-1 lg:order-1">
           <CardHeader>
             <CardTitle>Transactions</CardTitle>
           </CardHeader>
@@ -32,8 +44,8 @@ export default async function Home() {
             <DashboardActionItem href="/transfers" imgSrc="/images/icons/virement.png" label="Virements" />
           </CardContent>
         </Card>
-
-        <Card className="hidden md:block bg-green-50/50 dark:bg-green-900/20 backdrop-blur-sm">
+        
+        <Card className="hidden md:order-2 md:block bg-green-50/50 dark:bg-green-900/20 backdrop-blur-sm lg:order-2">
           <CardHeader>
             <CardTitle>Synthèse & Rapports</CardTitle>
           </CardHeader>
@@ -41,30 +53,16 @@ export default async function Home() {
             <DashboardActionItem href="/charts" imgSrc="/images/icons/graph.png" label="Graphiques" />
           </CardContent>
         </Card>
-      </div>
 
-       <div className="grid gap-6 md:grid-cols-2">
-            <Card className="hidden md:block bg-purple-50/50 dark:bg-purple-900/20 backdrop-blur-sm">
-                <CardHeader>
-                    <CardTitle>Planification & Budget</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
-                    <DashboardActionItem href="/planning" imgSrc="/images/icons/planning.png" label="Planning" />
-                </CardContent>
-            </Card>
-            
-            <Card className="bg-background/75 backdrop-blur-sm">
-                <CardHeader>
-                    <CardTitle>Activité Récente</CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center">
-                    <RecentActivityDialog
-                        initialTransactions={initialTransactions}
-                        initialTransfers={initialTransfers}
-                    />
-                </CardContent>
-            </Card>
-       </div>
+        <Card className="hidden md:order-4 md:block bg-purple-50/50 dark:bg-purple-900/20 backdrop-blur-sm lg:order-3">
+            <CardHeader>
+                <CardTitle>Planification & Budget</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+                <DashboardActionItem href="/planning" imgSrc="/images/icons/planning.png" label="Planning" />
+            </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
