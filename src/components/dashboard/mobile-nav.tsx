@@ -3,18 +3,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, BarChart2, CalendarDays, ArrowRightLeft, Plus, Wallet, TrendingUp, TrendingDown, Repeat, Bot } from 'lucide-react';
+import { LayoutDashboard, BarChart2, CalendarDays, ArrowRightLeft, Plus, Settings, TrendingUp, TrendingDown, Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AddTransactionSheet } from './add-transaction-sheet';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription, SheetClose } from '../ui/sheet';
 import { useState } from 'react';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function MobileNav() {
     const pathname = usePathname();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const { isAuthenticated } = useAuth();
 
-    if (pathname === '/') {
+    if (!isAuthenticated || pathname === '/login') {
         return null;
     }
 
@@ -31,6 +33,7 @@ export default function MobileNav() {
         { href: '/income', label: 'Revenus', icon: TrendingUp },
         { href: '/expenses', label: 'Dépenses', icon: TrendingDown },
         { href: '/transfers', label: 'Virements', icon: ArrowRightLeft },
+        { href: '/settings', label: 'Paramètres', icon: Settings },
     ]
 
     return (

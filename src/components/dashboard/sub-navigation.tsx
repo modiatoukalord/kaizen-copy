@@ -19,17 +19,16 @@ const navigationGroups = {
   planning: [
     { href: '/planning', label: 'Planning' },
   ],
+  account: [
+    { href: '/settings', label: 'Paramètres' },
+  ]
 };
 
 const findGroup = (pathname: string) => {
-  if (navigationGroups.transactions.some(item => pathname.startsWith(item.href))) {
-    return navigationGroups.transactions;
-  }
-  if (navigationGroups.synthesis.some(item => pathname.startsWith(item.href))) {
-    return navigationGroups.synthesis;
-  }
-  if (navigationGroups.planning.some(item => pathname.startsWith(item.href))) {
-    return navigationGroups.planning;
+  for (const group of Object.values(navigationGroups)) {
+    if (group.some(item => pathname.startsWith(item.href))) {
+        return group;
+    }
   }
   return [];
 }

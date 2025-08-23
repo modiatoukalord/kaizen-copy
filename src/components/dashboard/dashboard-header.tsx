@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { PiggyBank, PlusCircle, ArrowRightLeft, Menu } from 'lucide-react';
+import { PiggyBank, PlusCircle, ArrowRightLeft, Menu, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AddTransactionSheet } from './add-transaction-sheet';
 import { AddTransferSheet } from './add-transfer-sheet';
@@ -16,13 +16,23 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCurrency } from '@/contexts/currency-context';
-import { useState } from 'react';
+import { useAuth } from '@/contexts/auth-context';
 import InstallPWA from './install-pwa';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+  } from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+
 
 export default function DashboardHeader() {
   const pathname = usePathname();
   const { currency, setCurrency } = useCurrency();
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { user, logout } = useAuth();
   
   const transactionType = (() => {
     if (pathname === '/income') return 'income';
@@ -32,6 +42,7 @@ export default function DashboardHeader() {
   
   const isTransfersPage = pathname === '/transfers';
   const isPlanningPage = pathname === '/planning';
+  const isSettingsPage = pathname === '/settings';
   const isHomePage = pathname === '/dashboard';
 
   return (
@@ -57,7 +68,7 @@ export default function DashboardHeader() {
             </Select>
 
             <div className="hidden md:flex items-center gap-2">
-                 {!isPlanningPage && !isHomePage && (
+                 {!isPlanningPage && !isHomePage && !isSettingsPage && (
                   isTransfersPage ? (
                       <AddTransferSheet>
                           <Button>
@@ -75,6 +86,32 @@ export default function DashboardHeader() {
                   )
                 )}
             </div>
+
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                         <Avatar>
+                            <AvatarImage src={`https://i.pravatar.cc/150?u=${user?.username}`} />
+                            <AvatarFallback>{user?.username.charAt(0).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <Link href="/settings">
+                        <DropdownMenuItem>
+                            <Settings className="mr-2 h-4 w-4" />
+                            <span>Paramètres</span>
+                        </DropdownMenuItem>
+                    </Link>
+                    <DropdownMenuItem onClick={logout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Se déconnecter</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
         </div>
     </header>
   );
