@@ -253,7 +253,7 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
       </CardHeader>
       <CardContent className="overflow-auto max-h-[500px]">
           <Table>
-            <TableHeader>
+            <TableHeader className="sticky top-0 bg-card z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
