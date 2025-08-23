@@ -7,13 +7,13 @@ import { format, eachDayOfInterval, eachMonthOfInterval, startOfDay, parseISO, s
 import { fr } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
-import type { Transaction, Period } from '@/lib/types';
+import type { Transaction } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import { useCurrency } from '@/contexts/currency-context';
 
 interface SummaryChartProps {
   transactions: Transaction[];
-  period: Period;
+  period: 'weekly' | 'monthly' | 'quarterly' | 'annually';
 }
 
 export default function SummaryChart({ transactions, period }: SummaryChartProps) {

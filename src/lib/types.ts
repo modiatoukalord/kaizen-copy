@@ -97,7 +97,7 @@ export type Transfer = {
   toAccount: Account;
 };
 
-export type Period = 'weekly' | 'monthly' | 'quarterly' | 'annually';
+export type Period = 'weekly' | 'monthly' | 'quarterly' | 'annually' | 'custom';
 
 export type CategorizeResult = Awaited<ReturnType<typeof categorizeTransaction>>;
 

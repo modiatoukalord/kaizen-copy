@@ -5,24 +5,18 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   isWithinInterval,
-  startOfWeek,
-  endOfWeek,
   startOfMonth,
   endOfMonth,
-  startOfQuarter,
-  endOfQuarter,
-  startOfYear,
-  endOfYear,
   parseISO,
+  getYear,
+  format
 } from 'date-fns';
-import type { Transaction, Period, Category, Transfer } from '@/lib/types';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { fr } from 'date-fns/locale';
+import type { Transaction, Category, Transfer } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import StatCards from './stat-cards';
 import TransactionsTable from './transactions-table';
 import { IncomeCategory, AllExpenseSubCategories } from '@/lib/types';
-import SummaryChart from './summary-chart';
-import { Card, CardContent } from '../ui/card';
 import { getTransactions, getTransfers } from '@/lib/data';
 
 
@@ -35,35 +29,34 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ initialTransactions, initialTransfers = [], title, filterType, hideCharts = false }: DashboardProps) {
-  const [period, setPeriod] = useState<Period>('monthly');
+  const [selectedYear, setSelectedYear] = useState<number>(getYear(new Date()));
+  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'MM'));
+
   const [globalFilter, setGlobalFilter] = React.useState('');
-  
-  const periodOptions: { label: string, value: Period }[] = [
-    { label: 'Semaine', value: 'weekly' },
-    { label: 'Mois', value: 'monthly' },
-    { label: 'Trimestre', value: 'quarterly' },
-    { label: 'Année', value: 'annually' },
-  ];
+
+  const years = useMemo(() => {
+    const allYears = new Set(initialTransactions.map(t => getYear(new Date(t.date))));
+    const currentYear = getYear(new Date());
+    allYears.add(currentYear);
+    return Array.from(allYears).sort((a,b) => b - a);
+  }, [initialTransactions]);
+
+  const months = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => ({
+      value: format(new Date(2000, i), 'MM'),
+      label: format(new Date(2000, i), 'MMMM', { locale: fr }),
+    }));
+  }, []);
 
   const filteredData = useMemo(() => {
-    const now = new Date();
-    let interval;
-
-    switch (period) {
-      case 'weekly':
-        interval = { start: startOfWeek(now), end: endOfWeek(now) };
-        break;
-      case 'monthly':
-        interval = { start: startOfMonth(now), end: endOfMonth(now) };
-        break;
-      case 'quarterly':
-        interval = { start: startOfQuarter(now), end: endOfQuarter(now) };
-        break;
-      case 'annually':
-        interval = { start: startOfYear(now), end: endOfYear(now) };
-        break;
+    if (!selectedYear || !selectedMonth) {
+        return { transactions: [], transfers: [] };
     }
 
+    const startDate = startOfMonth(new Date(selectedYear, parseInt(selectedMonth, 10) - 1));
+    const endDate = endOfMonth(startDate);
+    const interval = { start: startDate, end: endDate };
+    
     let periodTransactions = initialTransactions.filter(t => isWithinInterval(parseISO(t.date), interval));
     const periodTransfers = initialTransfers.filter(t => isWithinInterval(parseISO(t.date), interval));
 
@@ -72,7 +65,7 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
     }
     
     return { transactions: periodTransactions, transfers: periodTransfers };
-  }, [period, initialTransactions, initialTransfers, filterType]);
+  }, [selectedYear, selectedMonth, initialTransactions, initialTransfers, filterType]);
   
   const allTransactionsForType = useMemo(() => {
      let filtered = initialTransactions;
@@ -97,76 +90,47 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
 
   return (
     <div className="space-y-4">
-        {title && (
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-            </div>
-        )}
-        <div className="w-full">
-            <div className="block md:hidden">
-                <Select value={period} onValueChange={(value) => setPeriod(value as Period)}>
-                <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner une période" />
-                </SelectTrigger>
-                <SelectContent>
-                    {periodOptions.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                    </SelectItem>
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            {title && <h2 className="text-2xl font-bold tracking-tight">{title}</h2>}
+            <div className="flex gap-2 w-full md:w-auto">
+                <Select value={String(selectedYear)} onValueChange={(value) => setSelectedYear(Number(value))}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Année" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    {years.map(year => (
+                        <SelectItem key={year} value={String(year)}>
+                        {year}
+                        </SelectItem>
                     ))}
-                </SelectContent>
+                    </SelectContent>
                 </Select>
-            </div>
-            <div className="hidden md:block">
-                <Tabs value={period} onValueChange={(value) => setPeriod(value as Period)} className="hidden md:block">
-                <TabsList>
-                    {periodOptions.map(option => (
-                    <TabsTrigger key={option.value} value={option.value}>{option.label}</TabsTrigger>
+                <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Mois" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    {months.map(month => (
+                        <SelectItem key={month.value} value={month.value}>
+                        {month.label}
+                        </SelectItem>
                     ))}
-                </TabsList>
-                </Tabs>
+                    </SelectContent>
+                </Select>
             </div>
         </div>
         
         <StatCards transactions={filteredData.transactions} transfers={filteredData.transfers} filterType={filterType} />
         
-        {!hideCharts ? (
-             <Tabs defaultValue="chart" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="chart">Graphique</TabsTrigger>
-                    <TabsTrigger value="table">Tableau</TabsTrigger>
-                </TabsList>
-                <TabsContent value="chart">
-                     <div className="overflow-x-auto">
-                        <div className="w-full">
-                            <SummaryChart transactions={filteredData.transactions} period={period} />
-                        </div>
-                    </div>
-                </TabsContent>
-                <TabsContent value="table">
-                     <div className="overflow-x-auto">
-                        <TransactionsTable 
-                            transactions={allTransactionsForType} 
-                            filterType={filterType}
-                            categoryOptions={categoryOptions}
-                            globalFilter={globalFilter}
-                            onGlobalFilterChange={setGlobalFilter}
-                        />
-                    </div>
-                </TabsContent>
-             </Tabs>
-        ) : (
-             <div className="overflow-x-auto">
-                <TransactionsTable 
-                    transactions={allTransactionsForType} 
-                    filterType={filterType}
-                    categoryOptions={categoryOptions}
-                    globalFilter={globalFilter}
-                    onGlobalFilterChange={setGlobalFilter}
-                />
-            </div>
-        )}
-       
+        <div className="overflow-x-auto">
+            <TransactionsTable 
+                transactions={allTransactionsForType} 
+                filterType={filterType}
+                categoryOptions={categoryOptions}
+                globalFilter={globalFilter}
+                onGlobalFilterChange={setGlobalFilter}
+            />
+        </div>
     </div>
   );
 }
