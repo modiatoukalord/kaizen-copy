@@ -14,7 +14,7 @@ export default async function ExpensesPage() {
               initialTransactions={transactions} 
               title="Dépenses"
               filterType='expense'
-              hideCharts={false}
+              hideCharts={true}
           />
       </div>
     </div>

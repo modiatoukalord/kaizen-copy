@@ -14,7 +14,7 @@ export default async function IncomePage() {
                 initialTransactions={transactions} 
                 title="Revenus"
                 filterType='income'
-                hideCharts={false}
+                hideCharts={true}
             />
         </div>
     </div>
