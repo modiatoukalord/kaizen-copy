@@ -93,7 +93,7 @@ export default function SummaryChart({ transactions, period }: SummaryChartProps
           <CardTitle>Synthèse financière</CardTitle>
           <CardDescription>Évolution de vos revenus, dépenses et solde net.</CardDescription>
         </CardHeader>
-        <CardContent className="flex h-[400px] items-center justify-center">
+        <CardContent className="flex h-[300px] items-center justify-center">
           <p className="text-muted-foreground">Aucune transaction pour la période sélectionnée.</p>
         </CardContent>
       </Card>
@@ -107,7 +107,7 @@ export default function SummaryChart({ transactions, period }: SummaryChartProps
         <CardDescription>Évolution de vos revenus, dépenses et solde net sur la période.</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={{}} className="h-[400px] w-full">
+        <ChartContainer config={{}} className="h-[300px] w-full">
             <LineChart
               data={chartData}
               margin={{
