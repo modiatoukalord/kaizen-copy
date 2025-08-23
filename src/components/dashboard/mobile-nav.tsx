@@ -3,13 +3,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, BarChart2, CalendarDays, ArrowRightLeft, Plus, Wallet, TrendingUp, TrendingDown, Repeat, Bot } from 'lucide-react';
+import { LayoutDashboard, BarChart2, CalendarDays, ArrowRightLeft, Plus, Wallet, TrendingUp, TrendingDown, Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AddTransactionSheet } from './add-transaction-sheet';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription, SheetClose } from '../ui/sheet';
 import { useState } from 'react';
-import ChatAssistant from '../assistant/chat-assistant';
 
 export default function MobileNav() {
     const pathname = usePathname();
@@ -44,12 +43,12 @@ export default function MobileNav() {
                 })}
                 
                 <div className="flex justify-center">
-                   <ChatAssistant>
+                    <AddTransactionSheet>
                         <Button size="icon" className="h-14 w-14 rounded-full shadow-lg -translate-y-4">
-                            <Bot className="h-6 w-6" />
-                            <span className="sr-only">Ouvrir l'assistant</span>
+                            <Plus className="h-6 w-6" />
+                            <span className="sr-only">Ajouter une transaction</span>
                         </Button>
-                   </ChatAssistant>
+                    </AddTransactionSheet>
                 </div>
                 
                  {secondaryNavItems.map((item) => {

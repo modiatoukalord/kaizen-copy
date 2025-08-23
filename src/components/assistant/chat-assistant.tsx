@@ -10,8 +10,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { askAssistant } from '@/app/actions';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { useMediaQuery } from '@/hooks/use-media-query';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
 
 interface Message {
   id: number;
@@ -19,97 +17,12 @@ interface Message {
   sender: 'user' | 'bot';
 }
 
-function ChatContent({ onSendMessage, messages, input, setInput, isPending }: { onSendMessage: (e: React.FormEvent) => void, messages: Message[], input: string, setInput: (s:string)=>void, isPending: boolean}) {
-    const scrollAreaRef = useRef<HTMLDivElement>(null);
-    useEffect(() => {
-        // Auto-scroll to the bottom when new messages are added
-        if (scrollAreaRef.current) {
-            const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
-            if (viewport) {
-                viewport.scrollTop = viewport.scrollHeight;
-            }
-        }
-    }, [messages]);
-
-    return (
-        <>
-          <ScrollArea className="flex-1 bg-background" ref={scrollAreaRef}>
-            <div className="p-4 space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    'flex items-end gap-2',
-                    message.sender === 'user' ? 'justify-end' : 'justify-start'
-                  )}
-                >
-                  {message.sender === 'bot' && (
-                    <Avatar className="h-8 w-8">
-                       <AvatarImage src="/images/icons/logo.png" alt="Bot" />
-                       <AvatarFallback>B</AvatarFallback>
-                    </Avatar>
-                  )}
-                  <div
-                    className={cn(
-                      'max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap',
-                      message.sender === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground'
-                    )}
-                  >
-                    {message.text}
-                  </div>
-                </div>
-              ))}
-              {isPending && (
-                 <div className="flex items-end gap-2 justify-start">
-                    <Avatar className="h-8 w-8">
-                       <AvatarImage src="/images/icons/logo.png" alt="Bot" />
-                       <AvatarFallback>B</AvatarFallback>
-                    </Avatar>
-                    <div className="bg-muted text-muted-foreground rounded-lg px-3 py-2">
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                    </div>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-          <footer className="border-t bg-background p-2">
-            <form onSubmit={onSendMessage} className="flex items-center gap-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Posez votre question..."
-                className="flex-1"
-                disabled={isPending}
-              />
-              <Button type="submit" size="icon" disabled={!input.trim() || isPending}>
-                <Send className="h-4 w-4" />
-              </Button>
-            </form>
-          </footer>
-        </>
-    )
-}
-
-function DesktopChatContent({ onSendMessage, messages, input, setInput, isPending }: { onSendMessage: (e: React.FormEvent) => void, messages: Message[], input: string, setInput: (s:string)=>void, isPending: boolean}) {
-    return (
-        <div className="flex flex-col h-full">
-            <header className="bg-primary text-primary-foreground p-4 rounded-t-lg">
-                <h3 className="font-bold text-lg">Assistant Virtuel</h3>
-            </header>
-            <ChatContent onSendMessage={onSendMessage} messages={messages} input={input} setInput={setInput} isPending={isPending} />
-        </div>
-    )
-}
-
-
-export default function ChatAssistant({ children }: { children?: React.ReactNode }) {
+export default function ChatAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isPending, startTransition] = useTransition();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
@@ -118,6 +31,16 @@ export default function ChatAssistant({ children }: { children?: React.ReactNode
       ]);
     }
   }, [isOpen, messages.length]);
+
+  useEffect(() => {
+    // Auto-scroll to the bottom when new messages are added
+    if (scrollAreaRef.current) {
+        const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
+        if (viewport) {
+            viewport.scrollTop = viewport.scrollHeight;
+        }
+    }
+}, [messages]);
 
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -153,34 +76,9 @@ export default function ChatAssistant({ children }: { children?: React.ReactNode
     });
   };
 
-  const chatContentProps = {
-    onSendMessage: handleSendMessage,
-    messages,
-    input,
-    setInput,
-    isPending
-  };
-
-  if (isMobile) {
-      return (
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                  {children || <Button>Open Chat</Button>}
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-full flex flex-col p-0 border-none">
-                  <SheetHeader className="bg-primary text-primary-foreground p-4 text-left">
-                    <SheetTitle>Assistant Virtuel</SheetTitle>
-                  </SheetHeader>
-                  <ChatContent {...chatContentProps} />
-              </SheetContent>
-          </Sheet>
-      );
-  }
-
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        {children || (
           <Button
             variant="default"
             size="icon"
@@ -189,15 +87,71 @@ export default function ChatAssistant({ children }: { children?: React.ReactNode
           >
             {isOpen ? <X className="h-8 w-8" /> : <Bot className="h-8 w-8" />}
           </Button>
-        )}
       </PopoverTrigger>
       <PopoverContent
         side="top"
         align="end"
-        className="w-80 md:w-96 rounded-lg shadow-xl border-none p-0 h-[60vh]"
+        className="w-80 md:w-96 rounded-lg shadow-xl border-none p-0 h-[60vh] flex flex-col"
         sideOffset={20}
       >
-        <DesktopChatContent {...chatContentProps} />
+        <header className="bg-primary text-primary-foreground p-4 rounded-t-lg">
+            <h3 className="font-bold text-lg">Assistant Virtuel</h3>
+        </header>
+        <ScrollArea className="flex-1 bg-background" ref={scrollAreaRef}>
+        <div className="p-4 space-y-4">
+            {messages.map((message) => (
+            <div
+                key={message.id}
+                className={cn(
+                'flex items-end gap-2',
+                message.sender === 'user' ? 'justify-end' : 'justify-start'
+                )}
+            >
+                {message.sender === 'bot' && (
+                <Avatar className="h-8 w-8">
+                    <AvatarImage src="/images/icons/logo.png" alt="Bot" />
+                    <AvatarFallback>B</AvatarFallback>
+                </Avatar>
+                )}
+                <div
+                className={cn(
+                    'max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap',
+                    message.sender === 'user'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
+                )}
+                >
+                {message.text}
+                </div>
+            </div>
+            ))}
+            {isPending && (
+                <div className="flex items-end gap-2 justify-start">
+                <Avatar className="h-8 w-8">
+                    <AvatarImage src="/images/icons/logo.png" alt="Bot" />
+                    <AvatarFallback>B</AvatarFallback>
+                </Avatar>
+                <div className="bg-muted text-muted-foreground rounded-lg px-3 py-2">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                </div>
+            </div>
+            )}
+        </div>
+        </ScrollArea>
+        <footer className="border-t bg-background p-2">
+        <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+            <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Posez votre question..."
+            className="flex-1"
+            disabled={isPending}
+            />
+            <Button type="submit" size="icon" disabled={!input.trim() || isPending}>
+            <Send className="h-4 w-4" />
+            </Button>
+        </form>
+        </footer>
       </PopoverContent>
     </Popover>
   );
