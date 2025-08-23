@@ -12,13 +12,13 @@ const exchangeRates: Record<string, number> = {
 };
 
 
-export function formatCurrency(amount: number, currency: string = 'XOF', compact = false) {
+export function formatCurrency(amount: number, currency: string = 'XOF', compact = false, unitOnly = false) {
   const amountInXOF = amount; // Assuming stored amounts are in XOF
 
   const convertedAmount = amountInXOF / exchangeRates[currency];
 
   const options: Intl.NumberFormatOptions = {
-    style: 'currency',
+    style: unitOnly ? 'decimal' : 'currency',
     currency,
     minimumFractionDigits: 2,
   };
@@ -29,13 +29,18 @@ export function formatCurrency(amount: number, currency: string = 'XOF', compact
   }
 
   if (currency === 'XOF') {
-    options.currencyDisplay = 'code';
+    if (!unitOnly) {
+      options.currencyDisplay = 'code';
+    }
     options.minimumFractionDigits = 0;
     
     const locale = 'fr-FR';
     let formatted = new Intl.NumberFormat(locale, options).format(convertedAmount);
-    // Replace XOF with FCFA for display
-    return formatted.replace('XOF', 'FCFA');
+    // Replace XOF with FCFA for display, if not unit only
+    if (!unitOnly) {
+      return formatted.replace('XOF', 'FCFA');
+    }
+    return formatted;
   }
 
   const locale = currency === 'EUR' ? 'fr-FR' : 'en-US';
