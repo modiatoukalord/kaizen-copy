@@ -96,12 +96,12 @@ function ChartsContent() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="overflow-x-auto">
-            <div className="min-w-[600px]">
+            <div className="min-w-[500px]">
               <IncomeExpenseChart transactions={filteredTransactions} />
             </div>
           </div>
           <div className="overflow-x-auto">
-            <div className="min-w-[600px]">
+            <div className="min-w-[500px]">
               <ParetoChart transactions={filteredTransactions} />
             </div>
           </div>
