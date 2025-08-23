@@ -112,8 +112,8 @@ export default function SummaryChart({ transactions, period }: SummaryChartProps
               data={chartData}
               margin={{
                 top: 5,
-                right: 0,
-                left: 0,
+                right: 20,
+                left: 10,
                 bottom: 5,
               }}
             >
