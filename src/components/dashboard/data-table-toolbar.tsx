@@ -45,13 +45,6 @@ export function DataTableToolbar<TData>({
           className="h-10 w-[150px] lg:w-[250px]"
         />
         <DateRangePicker date={date} onDateChange={setDate} />
-        {filterType === 'expense' && table.getColumn('parentCategory') && (
-          <DataTableFacetedFilter
-            column={table.getColumn('parentCategory')}
-            title="Catégorie"
-            options={categoryOptions}
-          />
-        )}
         {table.getColumn('category') && (
           <DataTableFacetedFilter
             column={table.getColumn('category')}
