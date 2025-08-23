@@ -1,13 +1,14 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Eye, Expand, Minimize } from 'lucide-react';
 import Dashboard from '@/components/dashboard';
 import type { Transaction, Transfer } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 interface RecentActivityDialogProps {
     initialTransactions: Transaction[];
@@ -15,7 +16,12 @@ interface RecentActivityDialogProps {
 }
 
 export default function RecentActivityDialog({ initialTransactions, initialTransfers }: RecentActivityDialogProps) {
-    const [isFullScreen, setIsFullScreen] = useState(false);
+    const isMobile = useMediaQuery("(max-width: 768px)");
+    const [isFullScreen, setIsFullScreen] = useState(isMobile);
+
+    useEffect(() => {
+        setIsFullScreen(isMobile);
+    }, [isMobile]);
 
     return (
         <Dialog>
