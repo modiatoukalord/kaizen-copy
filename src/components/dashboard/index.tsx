@@ -138,7 +138,7 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
                 </TabsList>
                 <TabsContent value="chart">
                      <div className="overflow-x-auto">
-                        <div className="min-w-[500px]">
+                        <div className="w-full">
                             <SummaryChart transactions={filteredData.transactions} period={period} />
                         </div>
                     </div>
