@@ -1,8 +1,9 @@
 
-import { ArrowDownLeft, ArrowUpRight, DollarSign, ArrowLeftRight, TrendingUp, CircleArrowLeft, Landmark, Smartphone, Wallet } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, DollarSign, ArrowLeftRight, TrendingUp, CircleArrowLeft, Landmark, Smartphone, Wallet, ChevronDown } from 'lucide-react';
 import type { Transaction, Transfer } from '@/lib/types';
 import StatCard from './stat-card';
 import { TransactionAccount } from '@/lib/types';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface StatCardsProps {
   transactions: Transaction[];
@@ -44,12 +45,29 @@ export default function StatCards({ transactions, transfers, filterType }: StatC
 
     if (filterType === 'income') {
         const gainPropre = income - totalCredit;
-        return (
+        const statsGrid = (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <StatCard title="Revenu total" value={income} icon={ArrowUpRight} tooltipText="Total de tous les revenus enregistrés pour la période." />
                 <StatCard title="Total crédit" value={totalCredit} icon={ArrowLeftRight} tooltipText="Total des montants reçus en tant que crédit." />
                 <StatCard title="Gain propre" value={gainPropre} icon={DollarSign} tooltipText="Revenu total moins les crédits reçus (Revenu - Crédit)." />
             </div>
+        );
+        return (
+            <>
+                <div className="md:hidden">
+                     <Accordion type="single" collapsible className="w-full">
+                        <AccordionItem value="item-1">
+                            <AccordionTrigger className='text-lg font-semibold'>Statistiques des revenus</AccordionTrigger>
+                            <AccordionContent>
+                                {statsGrid}
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                </div>
+                <div className="hidden md:block">
+                    {statsGrid}
+                </div>
+            </>
         );
     }
 
@@ -58,12 +76,29 @@ export default function StatCards({ transactions, transfers, filterType }: StatC
             .filter(t => t.category === 'Investissement' && t.type === 'expense')
             .reduce((sum, t) => sum + t.amount, 0);
         
-        return (
+        const statsGrid = (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <StatCard title="Total des dépenses" value={expenses} icon={ArrowDownLeft} tooltipText="Total de toutes les dépenses enregistrées pour la période."/>
                 <StatCard title="Total investissement" value={totalInvestissement} icon={TrendingUp} tooltipText="Total des montants dépensés en investissements." />
                 <StatCard title="Total remboursement" value={totalRemboursement} icon={CircleArrowLeft} tooltipText="Total des montants que vous avez remboursés." />
             </div>
+        );
+        return (
+            <>
+                <div className="md:hidden">
+                     <Accordion type="single" collapsible className="w-full">
+                        <AccordionItem value="item-1">
+                            <AccordionTrigger className='text-lg font-semibold'>Statistiques des dépenses</AccordionTrigger>
+                            <AccordionContent>
+                                {statsGrid}
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                </div>
+                <div className="hidden md:block">
+                    {statsGrid}
+                </div>
+            </>
         );
     }
     
@@ -93,7 +128,7 @@ export default function StatCards({ transactions, transfers, filterType }: StatC
         'Espèces': Wallet
     }
 
-    return (
+    const statsGrid = (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             <StatCard title="Solde net" value={balance} icon={DollarSign} tooltipText="Différence entre vos revenus et vos dépenses (Revenus - Dépenses)." />
              {Object.entries(accountBalances).map(([account, balance]) => (
@@ -102,5 +137,23 @@ export default function StatCards({ transactions, transfers, filterType }: StatC
             <StatCard title="Crédits restants" value={creditRestant} icon={ArrowLeftRight} tooltipText="Montant total des crédits que vous devez encore rembourser (Crédit - Remboursement)." />
             <StatCard title="Prêts nets" value={pretNet} icon={TrendingUp} tooltipText="Montant net que d'autres vous doivent (Créances - Prêts)." />
         </div>
+    );
+
+    return (
+        <>
+            <div className="md:hidden">
+                 <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger className='text-lg font-semibold'>Statistiques globales</AccordionTrigger>
+                        <AccordionContent>
+                            {statsGrid}
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+            </div>
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {statsGrid}
+            </div>
+        </>
     );
 }
