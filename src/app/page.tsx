@@ -20,20 +20,20 @@ const ONBOARDING_KEY = 'onboarding-complete';
 
 export default function WelcomePage() {
   const router = useRouter();
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-    const onboardingComplete = localStorage.getItem(ONBOARDING_KEY);
-    if (onboardingComplete === 'true') {
-      router.replace('/dashboard');
-    }
-  }, [router]);
-
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [count, setCount] = React.useState(0);
 
+  useEffect(() => {
+    const onboardingComplete = localStorage.getItem(ONBOARDING_KEY);
+    if (onboardingComplete === 'true') {
+      router.replace('/dashboard');
+    } else {
+      setShowOnboarding(true);
+    }
+  }, [router]);
+  
   useEffect(() => {
     if (!api) {
       return;
@@ -60,17 +60,12 @@ export default function WelcomePage() {
     router.push('/dashboard');
   };
 
-  if (!hasMounted) {
+  if (!showOnboarding) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <PiggyBank className="h-12 w-12 animate-pulse text-primary" />
       </div>
     );
-  }
-
-  const onboardingComplete = localStorage.getItem(ONBOARDING_KEY);
-  if (onboardingComplete === 'true') {
-    return null; // or a loading spinner while redirecting
   }
 
   return (
