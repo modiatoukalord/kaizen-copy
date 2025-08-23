@@ -32,7 +32,6 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
   const [selectedYear, setSelectedYear] = useState<number>(getYear(new Date()));
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'MM'));
 
-  const [globalFilter, setGlobalFilter] = React.useState('');
 
   const years = useMemo(() => {
     const allYears = new Set(initialTransactions.map(t => getYear(new Date(t.date))));
@@ -127,8 +126,6 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
                 transactions={allTransactionsForType} 
                 filterType={filterType}
                 categoryOptions={categoryOptions}
-                globalFilter={globalFilter}
-                onGlobalFilterChange={setGlobalFilter}
             />
         </div>
     </div>

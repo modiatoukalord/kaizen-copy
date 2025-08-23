@@ -48,20 +48,20 @@ import {
   } from "@/components/ui/dropdown-menu"
 import { handleDeleteTransaction } from '@/app/actions';
 import { toast } from '@/hooks/use-toast';
+import { DataTableToolbar } from './data-table-toolbar';
 
 interface TransactionsTableProps {
   transactions: Transaction[];
   filterType?: 'income' | 'expense';
   categoryOptions: { label: string; value: string; }[];
-  globalFilter: string;
-  onGlobalFilterChange: (filter: string) => void;
 }
 
-export default function TransactionsTable({ transactions, filterType, categoryOptions, globalFilter, onGlobalFilterChange }: TransactionsTableProps) {
+export default function TransactionsTable({ transactions, filterType, categoryOptions }: TransactionsTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'date', desc: true },
   ]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = React.useState('');
   const { currency } = useCurrency();
 
   const [isPending, startTransition] = React.useTransition();
@@ -100,6 +100,18 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
               <span className="hidden md:inline">{format(parseISO(row.getValue('date')), 'dd/MM/yyyy', { locale: fr })}</span>
             </>
           ),
+          filterFn: (row, id, value) => {
+            const date = parseISO(row.getValue(id));
+            const { from, to } = value;
+            if (from && !to) {
+              return date >= from;
+            } else if (!from && to) {
+              return date <= to;
+            } else if (from && to) {
+              return date >= from && date <= to;
+            }
+            return true;
+          },
         },
         {
           accessorKey: 'description',
@@ -227,7 +239,7 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
   const table = useReactTable({
     data: transactions,
     columns,
-    onGlobalFilterChange: onGlobalFilterChange,
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
@@ -249,7 +261,7 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
       <CardHeader>
         <CardTitle>Transactions</CardTitle>
         <CardDescription>Une liste de vos activités financières.</CardDescription>
-        
+        <DataTableToolbar table={table} categoryOptions={categoryOptions} filterType={filterType}/>
       </CardHeader>
       <CardContent className="overflow-auto max-h-[500px]">
           <Table>
