@@ -250,7 +250,7 @@ export async function askAssistant(message: string): Promise<{ reply: string }> 
     const data = await response.json();
     
     // The n8n agent returns a JSON object, we need to extract the text response.
-    const reply = data.reponse || "Désolé, je n'ai pas pu obtenir de réponse.";
+    const reply = data.reply || "Désolé, je n'ai pas pu obtenir de réponse.";
 
     return { reply };
   } catch (error) {

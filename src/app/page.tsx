@@ -85,7 +85,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-background p-6">
+    <div className="flex h-screen flex-col items-center justify-center p-6">
       <Carousel setApi={setApi} className="w-full max-w-md">
         <CarouselContent>
           {onboardingSteps.map((step, index) => (
