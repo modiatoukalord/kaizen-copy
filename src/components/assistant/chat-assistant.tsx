@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useTransition } from 'react';
-import { Bot, Send, X, Loader2 } from 'lucide-react';
+import { Bot, Send, X, Loader2, Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -12,6 +12,7 @@ import { askAssistant } from '@/app/actions';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 
 interface Message {
   id: number;
@@ -65,31 +66,34 @@ function ChatMessages({ messages, isPending, scrollAreaRef }: any) {
     )
 }
 
-function ChatInput({ input, setInput, handleSendMessage, isPending }: any) {
+function ChatInput({ input, setInput, handleSendMessage, isPending, speechRecognitionProps }: any) {
+    const { isListening, transcript, startListening, stopListening } = speechRecognitionProps;
+    
+    useEffect(() => {
+        if (transcript) {
+            setInput(transcript)
+        }
+    }, [transcript, setInput]);
+
     return (
         <footer className="border-t bg-background p-2">
             <form onSubmit={handleSendMessage} className="flex items-center gap-2">
                 <Input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Posez votre question..."
+                    placeholder={isListening ? "Je vous écoute..." : "Posez votre question..."}
                     className="flex-1"
                     disabled={isPending}
                 />
+                <Button type='button' variant="ghost" size="icon" onClick={isListening ? stopListening : startListening}>
+                    {isListening ? <MicOff className="h-5 w-5 text-destructive" /> : <Mic className="h-5 w-5" />}
+                    <span className="sr-only">{isListening ? "Arrêter l'enregistrement" : "Démarrer l'enregistrement"}</span>
+                </Button>
                 <Button type="submit" size="icon" disabled={!input.trim() || isPending}>
                     <Send className="h-4 w-4" />
                 </Button>
             </form>
         </footer>
-    )
-}
-
-function ChatContent({ messages, input, setInput, handleSendMessage, isPending, scrollAreaRef }: any) {
-    return (
-        <>
-            <ChatMessages messages={messages} isPending={isPending} scrollAreaRef={scrollAreaRef} />
-            <ChatInput input={input} setInput={setInput} handleSendMessage={handleSendMessage} isPending={isPending} />
-        </>
     )
 }
 
@@ -100,6 +104,9 @@ export default function ChatAssistant() {
   const [isPending, startTransition] = useTransition();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const speechRecognitionProps = useSpeechRecognition({
+      onEnd: () => {}, // You can add logic here if needed
+  });
 
 
   useEffect(() => {
@@ -122,6 +129,9 @@ export default function ChatAssistant() {
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
+    if (speechRecognitionProps.isListening) {
+        speechRecognitionProps.stopListening();
+    }
     if (!input.trim() || isPending) return;
 
     const userMessage: Message = {
@@ -153,7 +163,7 @@ export default function ChatAssistant() {
     });
   };
 
-  const chatInputProps = { input, setInput, handleSendMessage, isPending };
+  const chatInputProps = { input, setInput, handleSendMessage, isPending, speechRecognitionProps };
   const chatMessagesProps = { messages, isPending, scrollAreaRef };
 
   if (isMobile) {
