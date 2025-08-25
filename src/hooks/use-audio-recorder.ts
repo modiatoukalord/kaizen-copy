@@ -8,8 +8,6 @@ interface UseAudioRecorderProps {
   onRecordingComplete: (audioUrl: string, audioBlob: Blob, mimeType: string) => void;
 }
 
-const mimeType = 'audio/wav';
-
 export const useAudioRecorder = ({ onRecordingComplete }: UseAudioRecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -18,7 +16,9 @@ export const useAudioRecorder = ({ onRecordingComplete }: UseAudioRecorderProps)
   const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      
+      // Let the browser choose the mimeType
+      const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
@@ -27,6 +27,7 @@ export const useAudioRecorder = ({ onRecordingComplete }: UseAudioRecorderProps)
       };
 
       mediaRecorder.onstop = () => {
+        const mimeType = mediaRecorderRef.current?.mimeType || 'audio/webm';
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         const audioUrl = URL.createObjectURL(audioBlob);
         onRecordingComplete(audioUrl, audioBlob, mimeType);
@@ -50,9 +51,14 @@ export const useAudioRecorder = ({ onRecordingComplete }: UseAudioRecorderProps)
         console.error('Error accessing microphone:', err);
         let title = 'Accès au microphone refusé';
         let description = 'Veuillez autoriser l\'accès au microphone dans les paramètres de votre navigateur.';
-        if (err instanceof DOMException && err.name === 'NotFoundError') {
-            title = 'Microphone non trouvé';
-            description = 'Aucun microphone n\'a été détecté. Veuillez vérifier que votre appareil est bien connecté.';
+        if (err instanceof DOMException) {
+            if (err.name === 'NotFoundError') {
+                title = 'Microphone non trouvé';
+                description = 'Aucun microphone n\'a été détecté. Veuillez vérifier que votre appareil est bien connecté.';
+            } else if (err.name === 'NotAllowedError') {
+                 title = 'Permission refusée';
+                 description = 'Vous avez refusé l\'accès au microphone. Veuillez l\'autoriser dans les paramètres de votre navigateur.';
+            }
         }
        toast({
         variant: 'destructive',
