@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useAudioRecorder } from '@/hooks/use-audio-recorder';
+import AudioPlayer from './audio-player';
 
 interface Message {
   id: number;
@@ -48,12 +49,7 @@ function ChatMessages({ messages, isPending, scrollAreaRef }: any) {
                         )}
                     >
                         {message.text && <p className="whitespace-pre-wrap">{message.text.replace(/\*\*/g, '')}</p>}
-                        {message.audioUrl && (
-                          <div className="space-y-1">
-                              <p className="text-xs font-medium italic">Note vocale</p>
-                              <audio controls src={message.audioUrl} className="w-full h-10" />
-                          </div>
-                        )}
+                        {message.audioUrl && <AudioPlayer audioUrl={message.audioUrl} />}
                     </div>
                 </div>
                 ))}
