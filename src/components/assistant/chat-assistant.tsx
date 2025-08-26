@@ -136,7 +136,7 @@ export default function ChatAssistant() {
                 console.error("Error sending audio message:", error);
                 const errorMessage: Message = {
                     id: Date.now() + 1,
-                    text: error instanceof Error ? error.message : "Désolé, une erreur s'est produite lors de l'envoi du message vocal. Veuillez réessayer.",
+                    text: "Désolé, une erreur s'est produite lors de l'envoi du message vocal. Veuillez réessayer.",
                     sender: 'bot',
                 };
                 setMessages((prev) => [...prev, errorMessage]);
@@ -199,7 +199,7 @@ export default function ChatAssistant() {
       } catch (error) {
         const errorMessage: Message = {
             id: Date.now() + 1,
-            text: error instanceof Error ? error.message : "Désolé, une erreur s'est produite. Veuillez réessayer.",
+            text: "Désolé, une erreur s'est produite. Veuillez réessayer.",
             sender: 'bot',
         };
         setMessages((prev) => [...prev, errorMessage]);
