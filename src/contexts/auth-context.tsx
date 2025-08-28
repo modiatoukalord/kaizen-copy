@@ -5,9 +5,6 @@ import React, { createContext, useState, useContext, useEffect, useMemo, useCall
 import { useRouter } from 'next/navigation';
 import { getUserByUsername, createUser, updateUserByUsername } from '@/lib/data';
 import type { FirestoreUser } from '@/lib/types';
-import { storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-
 
 type User = {
   username: string;
@@ -22,7 +19,7 @@ type AuthContextType = {
   logout: () => void;
   changePin: (oldPin: string, newPin: string) => Promise<void>;
   changeUsername: (newUsername: string, pin: string) => Promise<void>;
-  uploadAndChangeProfilePicture: (file: File) => Promise<void>;
+  changeProfilePicture: (dataUrl: string) => Promise<void>;
   isRegistering: boolean;
 };
 
@@ -133,20 +130,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     sessionStorage.setItem('finance-app-session', JSON.stringify(updatedUser));
   }, [user]);
 
-  const uploadAndChangeProfilePicture = useCallback(async (file: File) => {
+  const changeProfilePicture = useCallback(async (dataUrl: string) => {
     if (!user) throw new Error("Utilisateur non connecté.");
-    if (!file) throw new Error("Aucun fichier sélectionné.");
 
-    const storedUser = await getUserByUsername(user.username);
-    if (!storedUser) throw new Error("Utilisateur non trouvé pour la mise à jour.");
-
-    const storageRef = ref(storage, `profile-pictures/${storedUser.id}`);
-    
-    await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(storageRef);
-
-    await updateUserByUsername(user.username, { profilePictureUrl: downloadURL });
-    const updatedUser: User = { ...user, profilePictureUrl: downloadURL };
+    await updateUserByUsername(user.username, { profilePictureUrl: dataUrl });
+    const updatedUser: User = { ...user, profilePictureUrl: dataUrl };
     setUser(updatedUser);
     sessionStorage.setItem('finance-app-session', JSON.stringify(updatedUser));
   }, [user]);
@@ -161,8 +149,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     changePin,
     changeUsername,
-    uploadAndChangeProfilePicture,
-  }), [user, isAuthLoading, isRegistering, login, logout, changePin, changeUsername, uploadAndChangeProfilePicture]);
+    changeProfilePicture,
+  }), [user, isAuthLoading, isRegistering, login, logout, changePin, changeUsername, changeProfilePicture]);
 
   return (
     <AuthContext.Provider value={value}>

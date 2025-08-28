@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 export default function SettingsPage() {
-  const { user, changePin, changeUsername, uploadAndChangeProfilePicture } = useAuth();
+  const { user, changePin, changeUsername, changeProfilePicture } = useAuth();
   
   // State for changing PIN
   const [oldPin, setOldPin] = useState('');
@@ -28,7 +28,7 @@ export default function SettingsPage() {
   const [isUsernameLoading, setIsUsernameLoading] = useState(false);
 
   // State for changing profile picture
-  const [pictureFile, setPictureFile] = useState<File | null>(null);
+  const [pictureDataUrl, setPictureDataUrl] = useState<string | null>(null);
   const [picturePreview, setPicturePreview] = useState<string | null>(user?.profilePictureUrl || null);
   const [isPictureLoading, setIsPictureLoading] = useState(false);
 
@@ -89,96 +89,45 @@ export default function SettingsPage() {
     }
   };
   
-  const handlePictureChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
+  const handlePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-        toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez sélectionner un fichier image.' });
+        toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez sélectionner un fichier image valide.' });
         return;
     }
 
-    try {
-        const compressedFile = await compressImage(file);
-        setPictureFile(compressedFile);
-        setPicturePreview(URL.createObjectURL(compressedFile));
-    } catch (error: any) {
-        toast({ variant: 'destructive', title: 'Erreur de compression', description: error.message });
-    }
-  }, []);
-
-  const compressImage = (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (event) => {
-            const img = document.createElement('img');
-            img.src = event.target?.result as string;
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 512;
-                const MAX_HEIGHT = 512;
-                let width = img.width;
-                let height = img.height;
-
-                if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                } else {
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                    }
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                if (!ctx) return reject(new Error('Impossible d\'obtenir le contexte du canvas.'));
-
-                ctx.drawImage(img, 0, 0, width, height);
-
-                let quality = 0.9;
-                const MAX_SIZE_MB = 1;
-                
-                const processBlob = (blob: Blob | null) => {
-                    if (blob) {
-                        if (blob.size / 1024 / 1024 > MAX_SIZE_MB && quality > 0.1) {
-                            quality -= 0.1;
-                            canvas.toBlob(processBlob, 'image/jpeg', quality);
-                        } else {
-                            const resizedFile = new File([blob], file.name, {
-                                type: 'image/jpeg',
-                                lastModified: Date.now(),
-                            });
-                            resolve(resizedFile);
-                        }
-                    } else {
-                        reject(new Error('Impossible de créer le blob de l\'image.'));
-                    }
-                };
-
-                canvas.toBlob(processBlob, 'image/jpeg', quality);
-            };
-            img.onerror = () => reject(new Error('Impossible de charger l\'image.'));
-        };
-        reader.onerror = () => reject(new Error('Impossible de lire le fichier.'));
-    });
+    const reader = new FileReader();
+    reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        // Simple size check (2MB limit for base64 string)
+        if (dataUrl.length > 2 * 1024 * 1024) {
+             toast({ variant: 'destructive', title: 'Erreur', description: 'L\'image est trop volumineuse (max 1.5Mo).' });
+             return;
+        }
+        setPictureDataUrl(dataUrl);
+        setPicturePreview(dataUrl);
+    };
+    reader.onerror = () => {
+        toast({ variant: 'destructive', title: 'Erreur', description: 'Impossible de lire le fichier.' });
+    };
+    reader.readAsDataURL(file);
   };
+
 
   const handlePictureSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pictureFile) {
-      toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez sélectionner un fichier image.' });
+    if (!pictureDataUrl) {
+      toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez sélectionner une image.' });
       return;
     }
     
     setIsPictureLoading(true);
     try {
-        await uploadAndChangeProfilePicture(pictureFile);
+        await changeProfilePicture(pictureDataUrl);
         toast({ title: 'Succès', description: 'Votre photo de profil a été mise à jour.' });
+        setPictureDataUrl(null);
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Erreur', description: error.message });
     } finally {
@@ -199,13 +148,13 @@ export default function SettingsPage() {
              <Card className="lg:col-span-2">
                 <CardHeader>
                     <CardTitle>Changer la photo de profil</CardTitle>
-                    <CardDescription>Mettez à jour votre photo de profil (max 1Mo).</CardDescription>
+                    <CardDescription>Mettez à jour votre photo de profil.</CardDescription>
                 </CardHeader>
                 <CardContent>
                      <form onSubmit={handlePictureSubmit} className="space-y-4">
                         <div className="flex items-center gap-4">
                             <Avatar className="h-20 w-20">
-                                <AvatarImage src={picturePreview || undefined} alt={user?.username} />
+                                <AvatarImage src={picturePreview || user?.profilePictureUrl || undefined} alt={user?.username} />
                                 <AvatarFallback>{user?.username.charAt(0).toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <div className="space-y-2 flex-1">
@@ -218,7 +167,7 @@ export default function SettingsPage() {
                                 />
                             </div>
                         </div>
-                        <Button type="submit" className="w-full" disabled={isPictureLoading || !pictureFile}>
+                        <Button type="submit" className="w-full" disabled={isPictureLoading || !pictureDataUrl}>
                             {isPictureLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Mettre à jour la photo
                         </Button>
