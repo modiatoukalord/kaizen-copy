@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth-context';
-import { Eagle, Loader2 } from 'lucide-react';
+import { Landmark, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const { login, isAuthLoading, isAuthenticated } = useAuth();
@@ -63,7 +63,7 @@ export default function LoginPage() {
   if (isAuthLoading || isAuthenticated) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
-        <Eagle className="h-12 w-12 animate-pulse text-primary" />
+        <Landmark className="h-12 w-12 animate-pulse text-primary" />
       </div>
     );
   }
@@ -73,7 +73,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <Eagle className="h-8 w-8 text-primary" />
+                <Landmark className="h-8 w-8 text-primary" />
             </div>
           <CardTitle className="text-2xl">{isRegistering ? 'Créer un compte' : 'Connexion'}</CardTitle>
           <CardDescription>

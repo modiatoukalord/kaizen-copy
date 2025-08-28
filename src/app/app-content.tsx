@@ -4,7 +4,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { useEffect } from 'react';
-import { Eagle } from 'lucide-react';
+import { Landmark } from 'lucide-react';
 import DashboardHeader from '@/components/dashboard/dashboard-header';
 import MobileNav from '@/components/dashboard/mobile-nav';
 import ChatAssistant from '@/components/assistant/chat-assistant';
@@ -25,7 +25,7 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
   if (isAuthLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
-        <Eagle className="h-12 w-12 animate-pulse text-primary" />
+        <Landmark className="h-12 w-12 animate-pulse text-primary" />
       </div>
     );
   }
@@ -35,7 +35,7 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
   if (!isAuthenticated && !publicRoutes.includes(pathname)) {
      return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
-        <Eagle className="h-12 w-12 animate-pulse text-primary" />
+        <Landmark className="h-12 w-12 animate-pulse text-primary" />
       </div>
     );
   }
