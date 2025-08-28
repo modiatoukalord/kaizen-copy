@@ -175,7 +175,7 @@ export default function SettingsPage() {
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Paramètres</h1>
           <p className="text-muted-foreground">Gérez les informations de votre compte.</p>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto w-full">
              <Card className="lg:col-span-2">
                 <CardHeader>
                     <CardTitle>Changer la photo de profil</CardTitle>
