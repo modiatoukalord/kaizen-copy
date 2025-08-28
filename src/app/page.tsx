@@ -12,7 +12,7 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel';
 import { Button } from '@/components/ui/button';
-import { PiggyBank } from 'lucide-react';
+import { Eagle } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 
 const onboardingSteps = [
@@ -79,7 +79,7 @@ export default function OnboardingPage() {
   if (isAuthLoading || isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
-        <PiggyBank className="h-12 w-12 animate-pulse text-primary" />
+        <Eagle className="h-12 w-12 animate-pulse text-primary" />
       </div>
     );
   }
