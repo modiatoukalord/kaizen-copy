@@ -99,15 +99,46 @@ export default function SettingsPage() {
     }
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-        const dataUrl = reader.result as string;
-        // Simple size check (2MB limit for base64 string)
-        if (dataUrl.length > 2 * 1024 * 1024) {
-             toast({ variant: 'destructive', title: 'Erreur', description: 'L\'image est trop volumineuse (max 1.5Mo).' });
-             return;
+    reader.onload = (event) => {
+        const img = document.createElement('img');
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 512;
+            const MAX_HEIGHT = 512;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+            } else {
+                if (height > MAX_HEIGHT) {
+                    width *= MAX_HEIGHT / height;
+                    height = MAX_HEIGHT;
+                }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+            
+            const dataUrl = canvas.toDataURL(file.type, 0.9); // 0.9 is the quality factor
+
+            // Firestore document size limit is 1 MiB (1,048,576 bytes)
+            // Base64 is ~33% larger, so we check for a safe limit.
+            if (dataUrl.length > 1.5 * 1024 * 1024) { // ~1.5 MB check
+                 toast({ variant: 'destructive', title: 'Erreur', description: 'L\'image est trop volumineuse, même après compression.' });
+                 return;
+            }
+            setPictureDataUrl(dataUrl);
+            setPicturePreview(dataUrl);
         }
-        setPictureDataUrl(dataUrl);
-        setPicturePreview(dataUrl);
+        img.onerror = () => {
+             toast({ variant: 'destructive', title: 'Erreur', description: 'Impossible de charger l\'image pour le redimensionnement.' });
+        }
+        img.src = event.target?.result as string;
     };
     reader.onerror = () => {
         toast({ variant: 'destructive', title: 'Erreur', description: 'Impossible de lire le fichier.' });
@@ -260,3 +291,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    

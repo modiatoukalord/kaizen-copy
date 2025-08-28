@@ -5,6 +5,7 @@ import React, { createContext, useState, useContext, useEffect, useMemo, useCall
 import { useRouter } from 'next/navigation';
 import { getUserByUsername, createUser, updateUserByUsername } from '@/lib/data';
 import type { FirestoreUser } from '@/lib/types';
+import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
 
 type User = {
   username: string;
@@ -166,3 +167,5 @@ export function useAuth() {
   }
   return context;
 }
+
+    
