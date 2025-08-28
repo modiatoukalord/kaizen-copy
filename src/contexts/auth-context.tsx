@@ -5,6 +5,9 @@ import React, { createContext, useState, useContext, useEffect, useMemo, useCall
 import { useRouter } from 'next/navigation';
 import { getUserByUsername, createUser, updateUserByUsername } from '@/lib/data';
 import type { FirestoreUser } from '@/lib/types';
+import { storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 
 type User = {
   username: string;
@@ -19,7 +22,7 @@ type AuthContextType = {
   logout: () => void;
   changePin: (oldPin: string, newPin: string) => Promise<void>;
   changeUsername: (newUsername: string, pin: string) => Promise<void>;
-  changeProfilePicture: (url: string) => Promise<void>;
+  uploadAndChangeProfilePicture: (file: File) => Promise<void>;
   isRegistering: boolean;
 };
 
@@ -78,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             throw new Error('Nom d\'utilisateur ou code PIN incorrect.');
        } else {
             const pinHash = mockHash(pin);
-            const userId = await createUser(username, pinHash);
+            await createUser(username, pinHash);
             const newUser = await getUserByUsername(username);
             if (newUser) {
                 handleLoginSuccess(newUser);
@@ -130,14 +133,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     sessionStorage.setItem('finance-app-session', JSON.stringify(updatedUser));
   }, [user]);
 
-  const changeProfilePicture = useCallback(async (url: string) => {
+  const uploadAndChangeProfilePicture = useCallback(async (file: File) => {
     if (!user) throw new Error("Utilisateur non connecté.");
+    if (!file) throw new Error("Aucun fichier sélectionné.");
 
-    await updateUserByUsername(user.username, { profilePictureUrl: url });
-    const updatedUser: User = { ...user, profilePictureUrl: url };
+    const storedUser = await getUserByUsername(user.username);
+    if (!storedUser) throw new Error("Utilisateur non trouvé pour la mise à jour.");
+
+    const storageRef = ref(storage, `profile-pictures/${storedUser.id}`);
+    
+    await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(storageRef);
+
+    await updateUserByUsername(user.username, { profilePictureUrl: downloadURL });
+    const updatedUser: User = { ...user, profilePictureUrl: downloadURL };
     setUser(updatedUser);
     sessionStorage.setItem('finance-app-session', JSON.stringify(updatedUser));
   }, [user]);
+
 
   const value = useMemo(() => ({
     user,
@@ -148,8 +161,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     changePin,
     changeUsername,
-    changeProfilePicture,
-  }), [user, isAuthLoading, isRegistering, login, logout, changePin, changeUsername, changeProfilePicture]);
+    uploadAndChangeProfilePicture,
+  }), [user, isAuthLoading, isRegistering, login, logout, changePin, changeUsername, uploadAndChangeProfilePicture]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -10,9 +10,12 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth-context';
 import { Loader2 } from 'lucide-react';
 import SubNavigation from '@/components/dashboard/sub-navigation';
+import Image from 'next/image';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 
 export default function SettingsPage() {
-  const { user, changePin, changeUsername, changeProfilePicture } = useAuth();
+  const { user, changePin, changeUsername, uploadAndChangeProfilePicture } = useAuth();
   
   // State for changing PIN
   const [oldPin, setOldPin] = useState('');
@@ -26,7 +29,8 @@ export default function SettingsPage() {
   const [isUsernameLoading, setIsUsernameLoading] = useState(false);
 
   // State for changing profile picture
-  const [newProfilePictureUrl, setNewProfilePictureUrl] = useState(user?.profilePictureUrl || '');
+  const [pictureFile, setPictureFile] = useState<File | null>(null);
+  const [picturePreview, setPicturePreview] = useState<string | null>(user?.profilePictureUrl || null);
   const [isPictureLoading, setIsPictureLoading] = useState(false);
 
 
@@ -86,16 +90,24 @@ export default function SettingsPage() {
     }
   };
   
+  const handlePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setPictureFile(file);
+    if (file) {
+        setPicturePreview(URL.createObjectURL(file));
+    }
+  };
+
   const handlePictureSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newProfilePictureUrl) {
-      toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez fournir une URL pour l\'image.' });
+    if (!pictureFile) {
+      toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez sélectionner un fichier image.' });
       return;
     }
     
     setIsPictureLoading(true);
     try {
-        await changeProfilePicture(newProfilePictureUrl);
+        await uploadAndChangeProfilePicture(pictureFile);
         toast({ title: 'Succès', description: 'Votre photo de profil a été mise à jour.' });
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Erreur', description: error.message });
@@ -114,6 +126,35 @@ export default function SettingsPage() {
           <p className="text-muted-foreground">Gérez les informations de votre compte.</p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+             <Card className="lg:col-span-2">
+                <CardHeader>
+                    <CardTitle>Changer la photo de profil</CardTitle>
+                    <CardDescription>Mettez à jour votre photo de profil.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <form onSubmit={handlePictureSubmit} className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <Avatar className="h-20 w-20">
+                                <AvatarImage src={picturePreview || `https://i.pravatar.cc/150?u=${user?.username}`} alt={user?.username} />
+                                <AvatarFallback>{user?.username.charAt(0).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div className="space-y-2 flex-1">
+                                <Label htmlFor="newProfilePicture">Choisir une image</Label>
+                                <Input
+                                    id="newProfilePicture"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handlePictureChange}
+                                />
+                            </div>
+                        </div>
+                        <Button type="submit" className="w-full" disabled={isPictureLoading || !pictureFile}>
+                            {isPictureLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Mettre à jour la photo
+                        </Button>
+                    </form>
+                </CardContent>
+            </Card>
             <Card>
                 <CardHeader>
                     <CardTitle>Changer le nom d'utilisateur</CardTitle>
@@ -191,31 +232,6 @@ export default function SettingsPage() {
                         <Button type="submit" className="w-full" disabled={isPinLoading}>
                             {isPinLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Changer le code PIN
-                        </Button>
-                    </form>
-                </CardContent>
-            </Card>
-             <Card className="lg:col-span-2">
-                <CardHeader>
-                    <CardTitle>Changer la photo de profil</CardTitle>
-                    <CardDescription>Mettez à jour votre photo de profil en utilisant une URL d'image.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                     <form onSubmit={handlePictureSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="newProfilePictureUrl">URL de l'image de profil</Label>
-                            <Input
-                                id="newProfilePictureUrl"
-                                type="url"
-                                value={newProfilePictureUrl}
-                                onChange={(e) => setNewProfilePictureUrl(e.target.value)}
-                                placeholder="https://example.com/image.png"
-                                required
-                            />
-                        </div>
-                        <Button type="submit" className="w-full" disabled={isPictureLoading}>
-                            {isPictureLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Mettre à jour la photo
                         </Button>
                     </form>
                 </CardContent>
