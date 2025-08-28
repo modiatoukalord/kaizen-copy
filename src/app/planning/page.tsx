@@ -313,21 +313,6 @@ export default function PlanningPage() {
                   <CardDescription>Notez vos prévisions.</CardDescription>
                   </CardHeader>
                   <CardContent>
-                      {upcomingEvents.length > 0 && (
-                          <Alert className="mb-4">
-                              <Bell className="h-4 w-4" />
-                              <AlertTitle>Événements à venir</AlertTitle>
-                              <AlertDescription>
-                                  <ul className="text-sm space-y-1">
-                                      {upcomingEvents.map(event => (
-                                          <li key={event.id}>
-                                              {format(new Date(event.date), 'dd/MM')}: {event.description} ({formatCurrency(event.amount, currency)})
-                                          </li>
-                                      ))}
-                                  </ul>
-                              </AlertDescription>
-                          </Alert>
-                      )}
                       <div className="overflow-x-auto flex justify-center">
                           <Calendar
                               mode="single"
