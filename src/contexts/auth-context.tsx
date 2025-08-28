@@ -3,19 +3,23 @@
 
 import React, { createContext, useState, useContext, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { getUserByUsername, createUser, updateUserByUsername } from '@/lib/data';
 
 type User = {
+  id: string;
   username: string;
+  pinHash: string;
 };
 
 type AuthContextType = {
-  user: User | null;
+  user: { username: string } | null;
   isAuthenticated: boolean;
   isAuthLoading: boolean;
-  login: (username: string, pin: string) => void;
+  login: (username: string, pin: string) => Promise<void>;
   logout: () => void;
-  changePin: (username: string, oldPin: string, newPin: string) => void;
-  changeUsername: (newUsername: string, pin: string) => void;
+  changePin: (oldPin: string, newPin: string) => Promise<void>;
+  changeUsername: (newUsername: string, pin: string) => Promise<void>;
+  isRegistering: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,33 +28,39 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const mockHash = (pin: string) => `hashed-${pin}`;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<{ username: string } | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isRegistering, setIsRegistering] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // This effect runs on the client-side after hydration
-    try {
-      const sessionUser = sessionStorage.getItem('finance-app-session');
-      if (sessionUser) {
-        setUser(JSON.parse(sessionUser));
-      }
-    } catch (error) {
-      console.error("Failed to parse session user:", error);
-      sessionStorage.removeItem('finance-app-session');
-    } finally {
-      setIsAuthLoading(false);
-    }
+    const checkUserStatus = async () => {
+        try {
+          const sessionUserJson = sessionStorage.getItem('finance-app-session');
+          if (sessionUserJson) {
+            setUser(JSON.parse(sessionUserJson));
+          } else {
+            // Check if any user exists in the DB to determine if we are in a register or login state
+             const checkUser = await getUserByUsername(null); 
+             setIsRegistering(!checkUser);
+          }
+        } catch (error) {
+          console.error("Failed to parse session user:", error);
+          sessionStorage.removeItem('finance-app-session');
+        } finally {
+          setIsAuthLoading(false);
+        }
+    };
+    checkUserStatus();
   }, []);
 
-  const login = useCallback((username: string, pin: string) => {
-    const storedUser = localStorage.getItem('finance-app-user');
+  const login = useCallback(async (username: string, pin: string) => {
+    const existingUser = await getUserByUsername(username);
     
-    if (storedUser) {
+    if (existingUser) {
       // Login existing user
-      const { username: storedUsername, pinHash } = JSON.parse(storedUser);
-      if (username === storedUsername && mockHash(pin) === pinHash) {
-        const currentUser = { username };
+      if (mockHash(pin) === existingUser.pinHash) {
+        const currentUser = { username: existingUser.username };
         setUser(currentUser);
         sessionStorage.setItem('finance-app-session', JSON.stringify(currentUser));
         router.replace('/dashboard');
@@ -58,14 +68,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Nom d\'utilisateur ou code PIN incorrect.');
       }
     } else {
-      // Register new user
-      const pinHash = mockHash(pin);
-      const newUser = { username, pinHash };
-      localStorage.setItem('finance-app-user', JSON.stringify(newUser));
-      const currentUser = { username };
-      setUser(currentUser);
-      sessionStorage.setItem('finance-app-session', JSON.stringify(currentUser));
-      router.replace('/dashboard');
+       // Check if any user exists at all
+       const anyUser = await getUserByUsername(null);
+       if (anyUser) {
+            // If users exist but this one doesn't, it's wrong credentials
+            throw new Error('Nom d\'utilisateur ou code PIN incorrect.');
+       } else {
+            // No users exist, so register this new user
+            const pinHash = mockHash(pin);
+            await createUser(username, pinHash);
+            const currentUser = { username };
+            setUser(currentUser);
+            sessionStorage.setItem('finance-app-session', JSON.stringify(currentUser));
+            router.replace('/dashboard');
+       }
     }
   }, [router]);
 
@@ -75,52 +91,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.replace('/login');
   }, [router]);
 
-  const changePin = useCallback((username: string, oldPin: string, newPin: string) => {
-    const storedUser = localStorage.getItem('finance-app-user');
-    if (!storedUser) {
-      throw new Error("Aucun utilisateur trouvé. Impossible de changer le PIN.");
-    }
-    const { username: storedUsername, pinHash } = JSON.parse(storedUser);
-    if (username === storedUsername && mockHash(oldPin) === pinHash) {
-        const updatedUser = { username, pinHash: mockHash(newPin) };
-        localStorage.setItem('finance-app-user', JSON.stringify(updatedUser));
+  const changePin = useCallback(async (oldPin: string, newPin: string) => {
+    if (!user) throw new Error("Utilisateur non connecté.");
+    
+    const storedUser = await getUserByUsername(user.username);
+    if (!storedUser) throw new Error("Utilisateur non trouvé.");
+    
+    if (mockHash(oldPin) === storedUser.pinHash) {
+        const newPinHash = mockHash(newPin);
+        await updateUserByUsername(user.username, { pinHash: newPinHash });
     } else {
         throw new Error("L'ancien code PIN est incorrect.");
     }
-  }, []);
+  }, [user]);
   
-  const changeUsername = useCallback((newUsername: string, pin: string) => {
-    const storedUserJSON = localStorage.getItem('finance-app-user');
-    if (!storedUserJSON) {
-      throw new Error("Aucun utilisateur trouvé. Impossible de changer le nom d'utilisateur.");
-    }
+  const changeUsername = useCallback(async (newUsername: string, pin: string) => {
+    if (!user) throw new Error("Utilisateur non connecté.");
 
-    const storedUser = JSON.parse(storedUserJSON);
+    const storedUser = await getUserByUsername(user.username);
+    if (!storedUser) throw new Error("Utilisateur non trouvé.");
+
     if (mockHash(pin) !== storedUser.pinHash) {
       throw new Error("Le code PIN est incorrect.");
     }
-
-    // Update localStorage
-    const updatedUser = { ...storedUser, username: newUsername };
-    localStorage.setItem('finance-app-user', JSON.stringify(updatedUser));
-
-    // Update sessionStorage
-    const currentUser = { username: newUsername };
-    sessionStorage.setItem('finance-app-session', JSON.stringify(currentUser));
     
-    // Update state
+    // Check if new username already exists
+    const newUsernameExists = await getUserByUsername(newUsername);
+    if (newUsernameExists) {
+        throw new Error("Ce nom d'utilisateur est déjà pris.");
+    }
+
+    await updateUserByUsername(user.username, { username: newUsername });
+    const currentUser = { username: newUsername };
     setUser(currentUser);
-  }, []);
+    sessionStorage.setItem('finance-app-session', JSON.stringify(currentUser));
+  }, [user]);
 
   const value = useMemo(() => ({
     user,
     isAuthenticated: !!user,
     isAuthLoading,
+    isRegistering,
     login,
     logout,
     changePin,
     changeUsername,
-  }), [user, isAuthLoading, login, logout, changePin, changeUsername]);
+  }), [user, isAuthLoading, isRegistering, login, logout, changePin, changeUsername]);
 
   return (
     <AuthContext.Provider value={value}>

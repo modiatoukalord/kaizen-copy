@@ -1,4 +1,5 @@
 
+
 import type { z } from 'zod';
 import type { categorizeTransaction } from '@/ai/flows/categorize-transaction';
 
@@ -76,6 +77,10 @@ export type IncomeCategoryType = (typeof IncomeCategory)[number];
 export type ExpenseSubCategoryType = (typeof AllExpenseSubCategories)[number];
 export type ExpenseParentCategoryType = (typeof ExpenseParentCategory)[number];
 
+export type FirestoreUser = {
+  username: string;
+  pinHash: string;
+};
 
 export type Transaction = {
   id: string;

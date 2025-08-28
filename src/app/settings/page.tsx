@@ -26,7 +26,7 @@ export default function SettingsPage() {
   const [isUsernameLoading, setIsUsernameLoading] = useState(false);
 
 
-  const handlePinSubmit = (e: React.FormEvent) => {
+  const handlePinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!oldPin || !newPin || !confirmPin) {
       toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez remplir tous les champs.' });
@@ -42,24 +42,22 @@ export default function SettingsPage() {
     }
 
     setIsPinLoading(true);
-    setTimeout(() => {
-        try {
-            if (user) {
-                changePin(user.username, oldPin, newPin);
-                toast({ title: 'Succès', description: 'Votre code PIN a été modifié.' });
-                setOldPin('');
-                setNewPin('');
-                setConfirmPin('');
-            }
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: 'Erreur', description: error.message });
-        } finally {
-            setIsPinLoading(false);
+    try {
+        if (user) {
+            await changePin(oldPin, newPin);
+            toast({ title: 'Succès', description: 'Votre code PIN a été modifié.' });
+            setOldPin('');
+            setNewPin('');
+            setConfirmPin('');
         }
-    }, 500);
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Erreur', description: error.message });
+    } finally {
+        setIsPinLoading(false);
+    }
   };
   
-  const handleUsernameSubmit = (e: React.FormEvent) => {
+  const handleUsernameSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUsername || !currentPinForUsername) {
       toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez remplir tous les champs.' });
@@ -71,19 +69,17 @@ export default function SettingsPage() {
     }
 
     setIsUsernameLoading(true);
-    setTimeout(() => {
-        try {
-            if (user) {
-                changeUsername(newUsername, currentPinForUsername);
-                toast({ title: 'Succès', description: 'Votre nom d\'utilisateur a été modifié.' });
-                setCurrentPinForUsername('');
-            }
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: 'Erreur', description: error.message });
-        } finally {
-            setIsUsernameLoading(false);
+    try {
+        if (user) {
+            await changeUsername(newUsername, currentPinForUsername);
+            toast({ title: 'Succès', description: 'Votre nom d\'utilisateur a été modifié.' });
+            setCurrentPinForUsername('');
         }
-    }, 500);
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Erreur', description: error.message });
+    } finally {
+        setIsUsernameLoading(false);
+    }
   };
 
 

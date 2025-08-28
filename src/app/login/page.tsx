@@ -13,21 +13,11 @@ import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 
 export default function LoginPage() {
-  const { login, isAuthLoading, isAuthenticated } = useAuth();
+  const { login, isAuthLoading, isAuthenticated, isRegistering } = useAuth();
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [pin, setPin] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem('finance-app-user');
-    if (storedUser) {
-      setIsRegistering(false);
-    } else {
-      setIsRegistering(true);
-    }
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -35,7 +25,7 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !pin) {
       toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez remplir tous les champs.' });
@@ -47,18 +37,14 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
-    // Simulate async operation
-    setTimeout(() => {
-        try {
-            login(username, pin);
-            toast({ title: 'Succès', description: isRegistering ? 'Compte créé avec succès !' : 'Connexion réussie !' });
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: 'Erreur de connexion', description: error.message });
-        } finally {
-            setIsLoading(false);
-        }
-    }, 500);
-
+    try {
+        await login(username, pin);
+        toast({ title: 'Succès', description: isRegistering ? 'Compte créé avec succès !' : 'Connexion réussie !' });
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Erreur de connexion', description: error.message });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   if (isAuthLoading || isAuthenticated) {

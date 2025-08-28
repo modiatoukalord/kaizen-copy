@@ -1,7 +1,43 @@
 
 import { db } from './firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, Timestamp, where, writeBatch } from 'firebase/firestore';
-import type { Transaction, Transfer, BudgetItem, CalendarEvent } from './types';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, Timestamp, where, writeBatch, limit } from 'firebase/firestore';
+import type { Transaction, Transfer, BudgetItem, CalendarEvent, FirestoreUser } from './types';
+
+
+// --- User Data ---
+
+export const getUserByUsername = async (username: string | null): Promise<(FirestoreUser & { id: string }) | null> => {
+    const usersCol = collection(db, 'users');
+    let q;
+    if (username) {
+        q = query(usersCol, where('username', '==', username), limit(1));
+    } else {
+        // If username is null, just check if any user exists
+        q = query(usersCol, limit(1));
+    }
+    const userSnapshot = await getDocs(q);
+    if (userSnapshot.empty) {
+        return null;
+    }
+    const userDoc = userSnapshot.docs[0];
+    return { id: userDoc.id, ...userDoc.data() } as FirestoreUser & { id: string };
+};
+
+export const createUser = async (username: string, pinHash: string): Promise<string> => {
+    const usersCol = collection(db, 'users');
+    const docRef = await addDoc(usersCol, { username, pinHash });
+    return docRef.id;
+};
+
+export const updateUserByUsername = async (username: string, data: Partial<FirestoreUser>): Promise<void> => {
+    const user = await getUserByUsername(username);
+    if (!user) {
+        throw new Error("Utilisateur non trouvé pour la mise à jour.");
+    }
+    const userDoc = doc(db, 'users', user.id);
+    await updateDoc(userDoc, data);
+};
+
 
 // In a real application, you would use a proper database.
 
