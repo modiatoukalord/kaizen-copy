@@ -30,14 +30,15 @@ export default function NotificationBell() {
                 getBudgetItems(year, month),
                 getCalendarEvents(),
             ]);
-            setTransactions(trans);
-            setBudgetItems(budget);
-            setEvents(ev);
+            setTransactions(trans || []);
+            setBudgetItems(budget || []);
+            setEvents(ev || []);
         };
         fetchData();
     }, []);
 
     const upcomingEvents = useMemo(() => {
+        if (!events.length) return [];
         const today = new Date();
         return events
             .filter(event => isFuture(new Date(event.date)) && differenceInDays(new Date(event.date), today) <= 7)
@@ -45,7 +46,7 @@ export default function NotificationBell() {
     }, [events]);
 
     const overBudgetItems = useMemo(() => {
-        if (!budgetItems.length) return [];
+        if (!budgetItems.length || !transactions.length) return [];
         const now = new Date();
         const startDate = startOfMonth(now);
         const endDate = endOfMonth(now);
