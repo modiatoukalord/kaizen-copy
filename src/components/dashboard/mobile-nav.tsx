@@ -3,11 +3,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, BarChart2, CalendarDays, ArrowRightLeft, Plus, Settings, TrendingUp, TrendingDown, Repeat, ArrowLeftRight } from 'lucide-react';
+import { LayoutDashboard, BarChart2, CalendarDays, ArrowRightLeft, Plus, Settings, TrendingUp, TrendingDown, Repeat, ArrowLeftRight, LineChart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AddTransactionSheet } from './add-transaction-sheet';
 import { Button } from '../ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription, SheetClose } from '../ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from '../ui/sheet';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { AddTransferSheet } from './add-transfer-sheet';
@@ -35,6 +35,7 @@ export default function MobileNav() {
         { href: '/income', label: 'Revenus', icon: TrendingUp },
         { href: '/expenses', label: 'Dépenses', icon: TrendingDown },
         { href: '/transfers', label: 'Virements', icon: ArrowRightLeft },
+        { href: '/projection', label: 'Projection', icon: LineChart },
         { href: '/settings', label: 'Paramètres', icon: Settings },
     ]
 

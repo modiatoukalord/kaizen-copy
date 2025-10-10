@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getTransactions, getTransfers } from '@/lib/data';
 import RecentActivityDialog from '@/components/dashboard/recent-activity-dialog';
+import { LineChart } from 'lucide-react';
 
 
 export default async function DashboardPage() {
@@ -51,6 +52,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <DashboardActionItem href="/charts" imgSrc="/images/icons/graph.png" label="Graphiques" />
+            <DashboardActionItem href="/projection" icon={LineChart} label="Projection" />
           </CardContent>
         </Card>
 
@@ -67,11 +69,12 @@ export default async function DashboardPage() {
   );
 }
 
-function DashboardActionItem({ href, imgSrc, label }: { href: string, imgSrc: string, label: string }) {
+function DashboardActionItem({ href, imgSrc, icon: Icon, label }: { href: string, imgSrc?: string, icon?: React.ElementType, label: string }) {
   return (
     <Link href={href}>
       <Button variant="outline" className="h-28 w-full flex-col gap-2 bg-background/75 hover:bg-accent/20 backdrop-blur-sm">
-        <Image src={imgSrc} alt={label} width={48} height={48} className="h-12 w-12" />
+        {imgSrc && <Image src={imgSrc} alt={label} width={48} height={48} className="h-12 w-12" />}
+        {Icon && <Icon className="h-12 w-12" />}
         <span>{label}</span>
       </Button>
     </Link>

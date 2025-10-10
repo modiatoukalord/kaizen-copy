@@ -15,6 +15,7 @@ const navigationGroups = {
   ],
   synthesis: [
     { href: '/charts', label: 'Graphiques' },
+    { href: '/projection', label: 'Projection' },
   ],
   planning: [
     { href: '/planning', label: 'Planning' },
@@ -25,7 +26,8 @@ const navigationGroups = {
 };
 
 const findGroup = (pathname: string) => {
-  for (const group of Object.values(navigationGroups)) {
+  for (const groupName in navigationGroups) {
+    const group = navigationGroups[groupName as keyof typeof navigationGroups];
     if (group.some(item => pathname.startsWith(item.href))) {
         return group;
     }
