@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/sheet';
 import { toast } from '@/hooks/use-toast';
 import type { CalendarEvent } from '@/lib/types';
+import { CalendarEventStatus } from '@/lib/types';
 import { handleAddOrUpdateCalendarEvent } from '@/app/actions';
 
 
@@ -34,6 +35,7 @@ const calendarEventSchema = z.object({
   description: z.string().min(1, 'La description est requise'),
   amount: z.coerce.number().min(0.01, 'Le montant est requis'),
   date: z.string().min(1, 'La date est requise'),
+  status: z.enum(CalendarEventStatus).optional(),
 });
 
 type CalendarEventFormValues = z.infer<typeof calendarEventSchema>;
@@ -64,6 +66,7 @@ export function AddOrUpdateEventSheet({ children, event, selectedDate, onEventUp
         description: event?.description || '',
         amount: event?.amount || 0,
         date: event?.date ? new Date(event.date).toISOString() : selectedDate?.toISOString() || new Date().toISOString(),
+        status: event?.status || 'Prévu',
     },
   });
 
@@ -73,6 +76,7 @@ export function AddOrUpdateEventSheet({ children, event, selectedDate, onEventUp
         description: event?.description || '',
         amount: event?.amount || 0,
         date: event?.date ? new Date(event.date).toISOString() : selectedDate?.toISOString() || new Date().toISOString(),
+        status: event?.status || 'Prévu',
     });
   }, [event, selectedDate, form, open]);
   
@@ -108,6 +112,8 @@ export function AddOrUpdateEventSheet({ children, event, selectedDate, onEventUp
         <form action={formAction} className="space-y-4 py-4">
           <input type="hidden" {...form.register('id')} />
           <input type="hidden" {...form.register('date')} />
+           <input type="hidden" {...form.register('status')} />
+
 
           <div className="space-y-2">
             <Label htmlFor="event-description">Description</Label>

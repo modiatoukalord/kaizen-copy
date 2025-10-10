@@ -113,10 +113,15 @@ export type BudgetItem = {
   planned: number;
 };
 
+export const CalendarEventStatus = ['Prévu', 'Terminé', 'Annulé'] as const;
+export type CalendarEventStatusType = (typeof CalendarEventStatus)[number];
+
 export type CalendarEvent = {
   id: string;
   date: string; // ISO 8601 format
   description: string;
   amount: number;
+  status: CalendarEventStatusType;
 };
+
 

@@ -172,11 +172,12 @@ export const getCalendarEvents = async (): Promise<CalendarEvent[]> => {
     });
 };
 
-export const addCalendarEvent = async (event: Omit<CalendarEvent, 'id'>) => {
+export const addCalendarEvent = async (event: Omit<CalendarEvent, 'id' | 'status'>) => {
     const eventsCol = collection(db, 'calendarEvents');
     await addDoc(eventsCol, {
         ...event,
         date: new Date(event.date),
+        status: 'Prévu', // Default status
     });
 };
 

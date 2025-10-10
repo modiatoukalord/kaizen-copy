@@ -4,7 +4,8 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { categorizeTransaction as categorizeTransactionFlow } from '@/ai/flows/categorize-transaction';
-import { TransactionCategory, TransactionAccount, type CategorizeTransactionInput, ExpenseParentCategory, AllExpenseSubCategories } from '@/lib/types';
+import { TransactionCategory, TransactionAccount, type CategorizeTransactionInput, ExpenseParentCategory, AllExpenseSubCategories, CalendarEventStatus } from '@/lib/types';
+import type { CalendarEventStatusType } from '@/lib/types';
 import { addTransaction as dbAddTransaction, getTransactions, updateTransaction as dbUpdateTransaction, deleteTransaction as dbDeleteTransaction, addTransfer as dbAddTransfer, updateTransfer as dbUpdateTransfer, deleteTransfer as dbDeleteTransfer, getBudgetItems, saveBudgetItems, getCalendarEvents, addCalendarEvent, updateCalendarEvent, deleteCalendarEvent, getAccountBalance, getTransfers } from '@/lib/data';
 
 const formSchema = z.object({
@@ -46,7 +47,13 @@ const calendarEventSchema = z.object({
   description: z.string().min(1, 'La description est requise'),
   amount: z.coerce.number().min(0.01, 'Le montant est requis'),
   date: z.string().min(1, 'La date est requise'),
+  status: z.enum(CalendarEventStatus).optional(),
 })
+
+const updateCalendarEventStatusSchema = z.object({
+    id: z.string(),
+    status: z.enum(CalendarEventStatus),
+});
 
 
 export async function handleAddOrUpdateTransaction(prevState: any, formData: FormData) {
@@ -252,7 +259,11 @@ export async function handleAddOrUpdateCalendarEvent(prevState: any, formData: F
   
   try {
     if (id) {
-      await updateCalendarEvent({ ...eventData, id, date: new Date(eventData.date).toISOString() });
+      const currentEvents = await getCalendarEvents();
+      const currentEvent = currentEvents.find(e => e.id === id);
+      const status = currentEvent?.status || 'Prévu';
+
+      await updateCalendarEvent({ ...eventData, id, date: new Date(eventData.date).toISOString(), status });
       revalidatePath('/planning');
       return { message: 'Événement mis à jour avec succès.', success: true, errors: {} };
     } else {
@@ -273,6 +284,26 @@ export async function handleDeleteCalendarEvent(id: string) {
   } catch (error) {
     return { message: 'Erreur lors de la suppression de l\'événement.', success: false };
   }
+}
+
+export async function handleUpdateCalendarEventStatus(id: string, status: CalendarEventStatusType) {
+    const validatedFields = updateCalendarEventStatusSchema.safeParse({ id, status });
+    if (!validatedFields.success) {
+        return { message: 'Données invalides.', success: false };
+    }
+
+    try {
+        const events = await getCalendarEvents();
+        const eventToUpdate = events.find(e => e.id === id);
+        if (!eventToUpdate) {
+            return { message: 'Événement non trouvé.', success: false };
+        }
+        await updateCalendarEvent({ ...eventToUpdate, status });
+        revalidatePath('/planning');
+        return { message: 'Statut de l\'événement mis à jour.', success: true };
+    } catch (error) {
+        return { message: 'Erreur lors de la mise à jour du statut.', success: false };
+    }
 }
 
 interface AskAssistantPayload {
