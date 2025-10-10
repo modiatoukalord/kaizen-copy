@@ -7,7 +7,7 @@ import { LayoutDashboard, BarChart2, CalendarDays, ArrowRightLeft, Plus, Setting
 import { cn } from '@/lib/utils';
 import { AddTransactionSheet } from './add-transaction-sheet';
 import { Button } from '../ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from '../ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose, SheetTrigger } from '../ui/sheet';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { AddTransferSheet } from './add-transfer-sheet';
