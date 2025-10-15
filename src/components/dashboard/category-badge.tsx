@@ -31,7 +31,6 @@ export const categoryIcons: Record<Category, LucideIcon> = {
   Salaire: Landmark,
   Autre: MoreHorizontal,
   Don: Gift,
-  'Aide sociale': HelpingHand,
   Investissement: TrendingUp,
   Remboursement: CircleArrowLeft,
   Prêt: HandCoins,

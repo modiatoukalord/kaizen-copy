@@ -12,17 +12,17 @@ export const IncomeCategory = [
 
 export const ExpenseSubCategory = {
   Personnel: [
-    'Aide sociale',
+    'Don',
     'Assurances',
-    'Autre',
     'Divertissement',
     'Investissement',
     'Nourriture',
     'Prêt',
     'Remboursement',
+    'Transport',
     'Vacances et voyage',
     'Vêtements et accessoires',
-    'Transport',
+    'Autre',
   ],
   Maison: [
     'Assurances',
@@ -45,10 +45,10 @@ const allSubCategories = [
 
 export const AllExpenseSubCategories = [...new Set(allSubCategories)].sort((a,b) => a.localeCompare(b)) as (
   'Agios' |
-  'Aide sociale' |
   'Assurances' |
   'Autre' |
   'Divertissement' |
+  'Don' |
   'Equipements maison' |
   'Factures' |
   'Frais bancaires' |
@@ -128,6 +128,7 @@ export type CalendarEvent = {
   amount: number;
   status: CalendarEventStatusType;
 };
+
 
 
 
