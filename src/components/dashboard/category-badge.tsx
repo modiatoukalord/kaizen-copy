@@ -17,7 +17,6 @@ import {
   Shirt,
   Plane,
   FileText,
-  Shield,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Category } from '@/lib/types';
@@ -41,7 +40,6 @@ export const categoryIcons: Record<Category, LucideIcon> = {
   'Vêtements et accessoires': Shirt,
   'Vacances et voyage': Plane,
   Factures: FileText,
-  Assurances: Shield,
   'Frais bancaires': Landmark,
   Agios: Landmark,
 };
