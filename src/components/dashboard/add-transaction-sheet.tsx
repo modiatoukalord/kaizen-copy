@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Calendar as CalendarIcon, Loader2, Wand2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/sheet';
 import { toast } from '@/hooks/use-toast';
 import { TransactionCategory, TransactionAccount, type Category, type Account, IncomeCategory, ExpenseSubCategory, ExpenseParentCategory, type Transaction, type ExpenseParentCategoryType, type ExpenseSubCategoryType } from '@/lib/types';
-import { handleAddOrUpdateTransaction, suggestCategory } from '@/app/actions';
+import { handleAddOrUpdateTransaction } from '@/app/actions';
 
 const transactionFormSchema = z.object({
   id: z.string().optional(),
@@ -67,7 +67,6 @@ interface AddTransactionSheetProps {
 
 export function AddTransactionSheet({ children, type: initialType, transaction, onSheetToggle }: AddTransactionSheetProps) {
   const [open, setOpen] = React.useState(false);
-  const [isSuggesting, setIsSuggesting] = React.useState(false);
   
   const isEditing = !!transaction;
   
@@ -168,50 +167,6 @@ export function AddTransactionSheet({ children, type: initialType, transaction, 
     }
   }, [state, form]);
 
-  const handleSuggestion = async () => {
-    const description = form.getValues('description');
-    const amount = form.getValues('amount');
-    if (!description || !amount) {
-        toast({
-            variant: 'destructive',
-            title: 'Échec de la suggestion',
-            description: "Veuillez entrer une description et un montant pour obtenir une suggestion.",
-        })
-        return;
-    }
-    
-    setIsSuggesting(true);
-    try {
-        const result = await suggestCategory(description, amount);
-        if (result?.category) {
-            if (transactionType === 'income' && IncomeCategory.includes(result.category as any)) {
-                 form.setValue('category', result.category);
-            } else if (transactionType === 'expense') {
-                for (const pCat of ExpenseParentCategory) {
-                    if ((ExpenseSubCategory[pCat] as readonly string[]).includes(result.category)) {
-                        form.setValue('parentCategory', pCat);
-                        form.setValue('category', result.category as ExpenseSubCategoryType);
-                        return;
-                    }
-                }
-            }
-            toast({
-                variant: 'default',
-                title: 'Suggestion non applicable',
-                description: `L'IA a suggéré "${result.category}" qui n'est pas une catégorie valide pour ce type de transaction.`,
-            })
-        }
-    } catch (error) {
-        toast({
-            variant: 'destructive',
-            title: 'Échec de la suggestion',
-            description: 'Impossible d\'obtenir une suggestion de l\'IA pour le moment.',
-        })
-    } finally {
-        setIsSuggesting(false);
-    }
-  };
-
   const selectedDate = form.watch('date') ? new Date(form.watch('date')) : undefined;
 
   return (
@@ -289,16 +244,6 @@ export function AddTransactionSheet({ children, type: initialType, transaction, 
            <div className="space-y-2">
                 <div className="flex items-center justify-between">
                     <Label>Catégorie</Label>
-                     {transactionType === 'expense' && (
-                        <Button variant="ghost" type="button" size="sm" onClick={handleSuggestion} disabled={isSuggesting}>
-                            {isSuggesting ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                                <Wand2 className="mr-2 h-4 w-4" />
-                            )}
-                            Suggérer
-                        </Button>
-                     )}
                 </div>
                 <div className={cn("grid gap-2", transactionType === 'expense' ? 'grid-cols-2' : 'grid-cols-1')}>
                     {transactionType === 'expense' && (

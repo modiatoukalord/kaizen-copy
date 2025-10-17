@@ -26,7 +26,8 @@ export const ExpenseSubCategory = {
   Maison: [
     'Equipements maison',
     'Factures',
-    'Travaux'
+    'Travaux',
+    'Autre'
   ],
   Banque: [
     'Frais bancaires',
@@ -125,8 +126,3 @@ export type CalendarEvent = {
   amount: number;
   status: CalendarEventStatusType;
 };
-
-
-
-
-
