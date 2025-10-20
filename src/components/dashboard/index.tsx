@@ -89,25 +89,22 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
     setDate(d => (direction === 'prev' ? sub(d, duration) : add(d, duration)));
   };
 
-  const filteredData = useMemo(() => {
-    const interval = { start: startDate, end: endDate };
-    let periodTransactions = initialTransactions.filter(t => isWithinInterval(parseISO(t.date), interval));
-    const periodTransfers = initialTransfers.filter(t => isWithinInterval(parseISO(t.date), interval));
-
-    if (filterType) {
-        periodTransactions = periodTransactions.filter(t => t.type === filterType);
-    }
-    
-    return { transactions: periodTransactions, transfers: periodTransfers };
-  }, [startDate, endDate, initialTransactions, initialTransfers, filterType]);
-  
-  const allTransactionsForType = useMemo(() => {
+  const transactionsForType = useMemo(() => {
      let filtered = initialTransactions;
      if (filterType) {
         filtered = filtered.filter(t => t.type === filterType);
     }
     return filtered;
   }, [initialTransactions, filterType]);
+
+  const filteredData = useMemo(() => {
+    const interval = { start: startDate, end: endDate };
+    const periodTransactions = transactionsForType.filter(t => isWithinInterval(parseISO(t.date), interval));
+    const periodTransfers = initialTransfers.filter(t => isWithinInterval(parseISO(t.date), interval));
+    
+    return { transactions: periodTransactions, transfers: periodTransfers };
+  }, [startDate, endDate, transactionsForType, initialTransfers]);
+  
 
   const categoryOptions = React.useMemo(() => {
     let categories: readonly string[];
@@ -173,7 +170,7 @@ export default function Dashboard({ initialTransactions, initialTransfers = [], 
         
         <div className="overflow-x-auto">
             <TransactionsTable 
-                transactions={allTransactionsForType} 
+                transactions={transactionsForType} 
                 filterType={filterType}
                 categoryOptions={categoryOptions}
             />
