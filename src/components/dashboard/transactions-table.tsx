@@ -11,7 +11,6 @@ import {
   getSortedRowModel,
   ColumnFiltersState,
   getFilteredRowModel,
-  getPaginationRowModel,
   getFacetedRowModel,
   getFacetedUniqueValues,
 } from '@tanstack/react-table';
@@ -245,7 +244,6 @@ export default function TransactionsTable({ transactions, filterType, categoryOp
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     state: {
